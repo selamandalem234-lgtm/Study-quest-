@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e1b4b" />
+      <stop offset="50%" stop-color="#312e81" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <linearGradient id="beanGrad" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#fde68a" />
+      <stop offset="40%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+    <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <radialGradient id="islandGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.35" />
+      <stop offset="100%" stop-color="#3b82f6" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <!-- Background rounded squircle / canvas -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+
+  <!-- Ambient study light -->
+  <circle cx="256" cy="270" r="180" fill="url(#islandGlow)" />
+
+  <!-- Floating Island Pod Base -->
+  <ellipse cx="256" cy="380" rx="140" ry="24" fill="#064e3b" opacity="0.4" />
+  <ellipse cx="256" cy="372" rx="130" ry="20" fill="#10b981" opacity="0.8" />
+  <ellipse cx="256" cy="368" rx="120" ry="16" fill="#34d399" />
+
+  <!-- Little study plant / sprout on Bean head -->
+  <!-- Stem -->
+  <path d="M256,155 Q256,120 252,105" stroke="#10b981" stroke-width="8" stroke-linecap="round" fill="none" />
+  <!-- Left Leaf -->
+  <path d="M252,110 C220,95 210,120 252,110 Z" fill="url(#leafGrad)" />
+  <!-- Right Leaf -->
+  <path d="M252,105 C285,90 295,115 252,105 Z" fill="url(#leafGrad)" />
+
+  <!-- Bean Body (Gentle kidney bean curve) -->
+  <g filter="url(#softGlow)">
+    <path d="M210,165 
+             C155,175 140,240 150,305 
+             C160,370 215,385 270,380 
+             C330,375 365,330 355,255 
+             C345,185 295,150 210,165 Z" 
+          fill="url(#beanGrad)" />
+  </g>
+
+  <!-- Eye Left -->
+  <circle cx="225" cy="255" r="10" fill="#1e1b4b" />
+  <circle cx="222" cy="252" r="3.5" fill="#ffffff" />
+
+  <!-- Eye Right -->
+  <circle cx="285" cy="250" r="10" fill="#1e1b4b" />
+  <circle cx="282" cy="247" r="3.5" fill="#ffffff" />
+
+  <!-- Rosy Cheeks -->
+  <ellipse cx="205" cy="272" rx="12" ry="7" fill="#fb7185" opacity="0.75" />
+  <ellipse cx="305" cy="268" rx="12" ry="7" fill="#fb7185" opacity="0.75" />
+
+  <!-- Cheerful Smile -->
+  <path d="M245,272 Q256,284 267,271" stroke="#1e1b4b" stroke-width="5" stroke-linecap="round" fill="none" />
+
+  <!-- Tiny Golden Star (Achievement / Focus) -->
+  <path d="M370,140 L374,152 L386,152 L376,160 L380,172 L370,164 L360,172 L364,160 L354,152 L366,152 Z" fill="#fde047" />
+  <circle cx="140" cy="180" r="3" fill="#93c5fd" opacity="0.8" />
+  <circle cx="380" cy="290" r="4" fill="#a7f3d0" opacity="0.8" />
+</svg>

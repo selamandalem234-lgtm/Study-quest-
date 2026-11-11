@@ -1,0 +1,121 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with avatar customization and friend code",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Auth UID" },
+        "displayName": { "type": "string", "maxLength": 50, "description": "Student display name" },
+        "friendCode": { "type": "string", "maxLength": 10, "description": "Unique 6-8 char friend code" },
+        "grade": { "type": "string", "maxLength": 50, "description": "Student grade level" },
+        "beanColor": { "type": "string", "maxLength": 20, "description": "Hex or theme color for Bean" },
+        "beanHat": { "type": "string", "maxLength": 30, "description": "Selected hat accessory" },
+        "totalStudyMinutes": { "type": "number", "description": "Total focus time in minutes" },
+        "createdAt": { "type": "string", "description": "Account creation timestamp" },
+        "updatedAt": { "type": "string", "description": "Last sync timestamp" }
+      },
+      "required": ["uid", "displayName", "friendCode"]
+    },
+    "StudyProgress": {
+      "title": "StudyProgress",
+      "description": "User's academic progress across subjects, streaks and XP",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner user ID" },
+        "grade": { "type": "string", "maxLength": 50, "description": "Student grade level" },
+        "examPeriodId": { "type": "string", "maxLength": 50, "description": "Active exam period ID" },
+        "examPeriods": { "type": "string", "description": "Serialized JSON array of custom exam periods" },
+        "userSubjects": { "type": "string", "description": "Serialized JSON array of custom subjects and portions" },
+        "quarter": { "type": "number", "description": "Current school quarter (1-4)" },
+        "xp": { "type": "number", "description": "Total XP earned" },
+        "totalPages": { "type": "number", "description": "Total pages completed" },
+        "bestStreak": { "type": "number", "description": "Longest active streak in days" },
+        "progress": { "type": "string", "description": "Serialized map of completed page offsets" },
+        "credited": { "type": "string", "description": "Serialized map of credited pages" },
+        "badges": { "type": "string", "description": "JSON map of unlocked badge IDs" },
+        "socks": { "type": "number", "description": "Current knitted sock balance" },
+        "updatedAt": { "type": "string", "description": "Last sync timestamp" }
+      },
+      "required": ["userId", "xp", "socks"]
+    },
+    "Island": {
+      "title": "Island",
+      "description": "User personal floating sky island with house and farm layout",
+      "type": "object",
+      "properties": {
+        "ownerId": { "type": "string", "description": "Owner user ID" },
+        "ownerName": { "type": "string", "maxLength": 50, "description": "Owner display name" },
+        "islandName": { "type": "string", "maxLength": 50, "description": "Custom island name" },
+        "houseLevel": { "type": "number", "description": "Farmhouse level (1: Cabin, 2: Cottage, 3: Observatory)" },
+        "decor": { "type": "string", "description": "JSON map of unlocked and placed island decorations" },
+        "theme": { "type": "string", "maxLength": 30, "description": "Island biome theme" },
+        "updatedAt": { "type": "string", "description": "Last update timestamp" }
+      },
+      "required": ["ownerId", "houseLevel"]
+    },
+    "Crop": {
+      "title": "Crop",
+      "description": "A growing crop plot on the user's floating island",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Crop plot ID (0 to 5)" },
+        "ownerId": { "type": "string", "description": "Island owner UID" },
+        "cropType": { "type": "string", "enum": ["wheat", "starberry", "moonblossom", "sunflower"], "description": "Type of crop" },
+        "stage": { "type": "number", "description": "Growth stage (0: Seed, 1: Sprout, 2: Blooming, 3: Golden Harvest)" },
+        "waterMinutes": { "type": "number", "description": "Cumulative study minutes applied as water/sunlight" },
+        "plantedAt": { "type": "string", "description": "Timestamp when planted" }
+      },
+      "required": ["id", "ownerId", "cropType", "stage"]
+    },
+    "FriendCodeMapping": {
+      "title": "FriendCodeMapping",
+      "description": "Public lookup mapping unique friend codes to user IDs",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string", "maxLength": 10, "description": "Friend code (e.g. BEAN-492)" },
+        "userId": { "type": "string", "description": "Target User ID" },
+        "displayName": { "type": "string", "maxLength": 50, "description": "User display name" }
+      },
+      "required": ["code", "userId", "displayName"]
+    },
+    "Friendship": {
+      "title": "Friendship",
+      "description": "Friendship connection between two players",
+      "type": "object",
+      "properties": {
+        "userA": { "type": "string", "description": "First user ID" },
+        "userB": { "type": "string", "description": "Second user ID" },
+        "status": { "type": "string", "enum": ["pending", "accepted"], "description": "Friendship status" },
+        "createdAt": { "type": "string", "description": "Creation timestamp" }
+      },
+      "required": ["userA", "userB", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Public user profiles with Bean customizations"
+    },
+    "/users/{userId}/progress/study": {
+      "schema": "StudyProgress",
+      "description": "Private academic study tracker progress"
+    },
+    "/islands/{userId}": {
+      "schema": "Island",
+      "description": "Personal floating sky island configurations"
+    },
+    "/islands/{userId}/crops/{cropId}": {
+      "schema": "Crop",
+      "description": "Crops growing on personal island plots"
+    },
+    "/friendCodes/{code}": {
+      "schema": "FriendCodeMapping",
+      "description": "Public friend code directory"
+    },
+    "/friendships/{friendshipId}": {
+      "schema": "Friendship",
+      "description": "Connections between players"
+    }
+  }
+}

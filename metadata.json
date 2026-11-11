@@ -1,0 +1,6 @@
+{
+  "name": "Study Quest — Multiplayer Bean World & Grade 10 Companion",
+  "description": "Premium multiplayer study game with customizable Bean companion, floating sky islands, crop farming, friends visits, Pomodoro focus timers, and Grade 10 textbook revision.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,1982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Grade 10 Test 2 Page Tracker — Quiz Fix v2</title>
+<style>
+:root{
+  --paper:#f3f6fc;--sheet:#fff;--ink:#16203a;--muted:#56627f;--rule:#dfe7f5;--rule2:#c3cfe8;
+  --margin:#e5484d;--hi:#ffd93d;--pen:#2b4bd6;--flame:#ff7a1a;--ok:#0f7a5a;--bad:#b42332;
+  --font:"Avenir Next","Nunito","Trebuchet MS",ui-rounded,system-ui,"Segoe UI",Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.45 var(--font)}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3,p{margin:0}
+:focus-visible{outline:3px solid var(--pen);outline-offset:2px}
+#app{max-width:720px;margin:0 auto;padding:16px 16px 48px}
+.muted{color:var(--muted)}
+.small{font-size:.88rem}
+
+/* top bar */
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:6px 0 14px}
+.top h1{font-size:1.75rem;font-weight:800;letter-spacing:-.01em;line-height:1.1}
+.sub{color:var(--muted);font-size:.9rem;margin-top:3px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-weight:700;font-size:.92rem;background:var(--sheet);border:1px solid var(--rule2)}
+.chip.flame{background:#fff0e3;border-color:#ffc08a;color:#7a3300}
+.chip.cold{color:var(--muted)}
+
+/* buttons */
+.go{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:64px;padding:14px 20px;margin-bottom:5px;background:var(--hi);color:var(--ink);border:2.5px solid var(--ink);border-radius:16px;box-shadow:0 5px 0 var(--ink);font-weight:800;font-size:1.3rem;cursor:pointer;transition:transform .08s,box-shadow .08s}
+.go:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
+.go:disabled{opacity:.5;cursor:not-allowed}
+.btn{min-height:44px;padding:9px 14px;background:var(--sheet);border:1.5px solid var(--rule2);border-radius:12px;font-weight:650;cursor:pointer}
+.btn:hover{border-color:var(--ink)}
+.btn.sm{min-height:40px;padding:6px 12px;font-size:.92rem}
+.btn.primary{background:var(--pen);border-color:var(--pen);color:#fff}
+.btn.danger{color:var(--bad)}
+.link{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;padding:8px;min-height:44px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+
+/* subject spines + highlighter */
+.spine{flex:none;width:48px;height:56px;display:grid;place-items:center;font-size:1.7rem;background:var(--t);border-left:7px solid var(--c);border-radius:6px 12px 12px 6px}
+mark{background:linear-gradient(transparent 52%,var(--hi) 52%,var(--hi) 92%,transparent 92%);color:inherit;padding:0 .2em;margin:0 -.2em}
+
+/* hero: an exercise-book page */
+.page{position:relative;background-color:#fff;background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 31px,#e6edf9 31px,#e6edf9 32px);background-position:0 14px;border:1px solid var(--rule2);border-radius:16px;padding:22px 20px 20px 62px}
+.page::before{content:"";position:absolute;left:44px;top:0;bottom:0;width:2px;background:var(--margin);opacity:.55}
+.nu{display:flex;gap:14px;align-items:center}
+.nu-name{font-size:clamp(1.6rem,6vw,2.2rem);font-weight:800;line-height:1.15}
+.nu-meta{color:var(--muted);font-size:.95rem;margin-top:2px}
+.tiny{margin:18px 0 16px;font-size:1.08rem}
+.alt{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:18px}
+.alt .btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:8px 4px;font-size:.85rem;line-height:1.2;text-align:center}
+.alt .em{font-size:1.3rem;line-height:1.1}
+.alldone h2{font-size:1.5rem;font-weight:800;margin-bottom:6px}
+
+/* today board */
+.board{margin-top:16px;background:var(--sheet);border:1px solid var(--rule2);border-radius:14px}
+.board>div{padding:16px 18px;border-top:1px solid var(--rule)}
+.board>div:first-child{border-top:0}
+.numline{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.num{font-size:2rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.strip{height:12px;background:#e7edf9;border-radius:99px;overflow:hidden;margin:10px 0}
+.strip i{display:block;height:100%;background:var(--ok);border-radius:99px;transition:width .3s}
+.strip.xp{background:#fff;border:1.5px solid var(--ink);height:16px}
+.strip.xp i{background:var(--hi)}
+.strip.all i{background:var(--pen)}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;font-weight:700;font-size:.88rem}
+.pill.ok{background:#dcf4ea;color:#0a5a41}
+.pill.bad{background:#fde5e8;color:#8f1c28}
+.pill.info{background:#e8edfb;color:#223a9c}
+.board p+p{margin-top:6px}
+
+/* folds */
+.folds{margin-top:18px;border-bottom:1px solid var(--rule2)}
+.fold{border-top:1px solid var(--rule2)}
+.fold summary{display:flex;align-items:center;gap:10px;min-height:58px;padding:12px 4px;cursor:pointer;font-weight:750;font-size:1.05rem;list-style:none}
+.fold summary::-webkit-details-marker{display:none}
+.fold summary::after{content:"+";font-size:1.5rem;line-height:1;color:var(--muted);width:20px;text-align:center}
+.fold[open] summary::after{content:"\2013"}
+.fold .count{margin-left:auto;color:var(--muted);font-weight:600;font-size:.9rem}
+.fold .body{padding:2px 4px 22px}
+.check{display:flex;align-items:center;gap:10px;min-height:44px;font-weight:600}
+.check input{width:22px;height:22px;accent-color:var(--pen)}
+
+/* forms */
+.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+label{display:block;font-weight:650;font-size:.9rem;margin-bottom:5px}
+.field input,.field select,.field textarea{width:100%;min-height:44px;padding:9px 12px;border:1.5px solid var(--rule2);border-radius:10px;background:#fff}
+.field{margin-bottom:2px}
+
+/* subjects */
+.subj{display:grid;grid-template-columns:auto 1fr;gap:12px;padding:14px 0;border-top:1px solid var(--rule)}
+.subj:first-of-type{border-top:0}
+.subj .spine{width:42px;height:54px;font-size:1.4rem}
+.subj h3{font-size:1.05rem;font-weight:750}
+.subj .meta{color:var(--muted);font-size:.88rem}
+.subj .strip{margin:8px 0 6px}
+.subj .strip i{background:var(--c)}
+.subj .acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
+.subj .acts .st{margin-right:auto;color:var(--muted);font-size:.85rem}
+.donechips{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.donechip{padding:4px 10px;border-radius:99px;background:var(--t);border:1.5px solid var(--c);font-weight:650;font-size:.9rem}
+
+/* badges */
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(138px,1fr));gap:10px}
+.badge{padding:12px;border-radius:12px;border:1.5px dashed var(--rule2);text-align:center}
+.badge .e{font-size:1.9rem;display:block;filter:grayscale(1);opacity:.4}
+.badge b{display:block;font-size:.92rem;margin-top:4px}
+.badge span.d{display:block;color:var(--muted);font-size:.8rem;margin-top:2px}
+.badge.on{background:#fff8d4;border:1.5px solid #e0b400}
+.badge.on .e{filter:none;opacity:1}
+
+/* weekly chart */
+.chart-wrap{position:relative;margin:6px 0 10px;--h:150px}
+.chart{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.col{position:relative;display:grid;grid-template-rows:var(--h) 28px;justify-items:center;border-radius:6px}
+.col .plot{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;width:100%;border-bottom:1.5px solid var(--rule2)}
+.col .val{font-size:.8rem;font-weight:800;height:20px;line-height:20px}
+.col i{display:block;width:min(70%,36px);background:#7c93e8;border-radius:4px 4px 0 0}
+.col.today i{background:var(--pen)}
+.col b{font-size:.8rem;font-weight:600;color:var(--muted);align-self:center}
+.col.today b{color:var(--ink);font-weight:800}
+.col:hover::after,.col:focus::after{content:attr(data-tip);position:absolute;left:50%;top:0;transform:translate(-50%,-100%);background:var(--ink);color:#fff;padding:4px 8px;border-radius:8px;font-size:.8rem;white-space:nowrap;z-index:5}
+.goalline{position:absolute;left:0;right:0;border-top:2px dashed var(--muted);pointer-events:none}
+.goalline span{position:absolute;right:0;top:-22px;font-size:.78rem;color:var(--muted);background:var(--paper);padding:0 4px}
+
+/* focus overlay */
+.focus{position:fixed;inset:0;z-index:100;display:flex;overflow:auto;background-color:var(--t);background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 35px,rgba(22,32,58,.07) 35px,rgba(22,32,58,.07) 36px);padding:max(20px,env(safe-area-inset-top)) 20px 28px}
+.fpage{width:100%;max-width:520px;margin:auto;display:flex;flex-direction:column;gap:18px;text-align:center}
+.f-head{display:flex;justify-content:space-between;align-items:center;font-weight:750;color:var(--c);min-height:44px}
+.f-subj{display:flex;align-items:center;gap:12px;justify-content:center}
+.f-subj h2{font-size:1.7rem;font-weight:800}
+.f-subj .spine{background:#fff}
+.f-clock{font-size:clamp(5rem,26vw,8.5rem);font-weight:800;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.03em;color:var(--c)}
+.f-track{height:24px;border-radius:99px;background:#fff;border:2px solid var(--ink);overflow:hidden}
+.f-track i{display:block;height:100%;width:100%;background:var(--hi);transition:width .25s linear}
+.f-goal{font-size:1.1rem}
+.f-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.f-btns .go{flex:1 1 100%;width:auto}
+.f-phone{color:var(--muted);font-size:.92rem}
+.f-box{background:#fff;border:1.5px solid var(--ink);border-radius:16px;padding:16px;text-align:left;display:flex;flex-direction:column;gap:12px}
+.f-box .f-btns{justify-content:flex-start}
+.f-exact{display:flex;gap:8px;align-items:flex-end}
+.f-exact .field{flex:1}
+.f-reward{background:#fff8d4;border:2px dashed #d9a900;border-radius:14px;padding:12px}
+
+/* modal, toast, confetti */
+.modal{position:fixed;inset:0;z-index:250;background:rgba(22,32,58,.55);display:grid;place-items:center;padding:16px}
+.modal-box{background:#fff;border-radius:16px;padding:18px;max-width:420px;width:100%;max-height:85vh;overflow:auto}
+.modal-box h2{font-size:1.2rem}
+.picklist{display:grid;gap:8px;margin:12px 0}
+.pick{display:flex;gap:10px;align-items:center;text-align:left;padding:8px 12px;min-height:52px;border:1.5px solid var(--rule2);border-left:7px solid var(--c);border-radius:6px 12px 12px 6px;background:var(--t);font-weight:650;cursor:pointer}
+.modal textarea{width:100%;min-height:110px;margin:12px 0;padding:10px;border:1.5px solid var(--rule2);border-radius:10px}
+.toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom));transform:translate(-50%,20px);z-index:300;background:var(--ink);color:#fff;padding:12px 16px;border-radius:14px;width:max-content;max-width:min(92vw,520px);display:flex;gap:14px;align-items:center;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+.toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.toast button{background:none;border:0;color:var(--hi);font-weight:800;text-decoration:underline;cursor:pointer;min-height:36px;padding:0 4px}
+#confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:400}
+
+footer{padding:18px 4px 0;color:var(--muted);font-size:.85rem}
+
+/* textbook questions: book panel + quiz */
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.bk-off{display:flex;gap:8px;align-items:center}
+.bk-off input{flex:1;min-width:0;text-align:center;font-weight:800;font-size:1.2rem;min-height:48px}
+.bk-off .btn{min-width:56px;min-height:48px;font-size:1.3rem;font-weight:800}
+.bk-prev{margin-top:6px;padding:10px 12px;background:#f3f6fc;border:1.5px dashed var(--rule2);border-radius:10px;font-size:.92rem;line-height:1.5;max-height:150px;overflow:auto;word-break:break-word}
+.qz>*+*{margin-top:10px}
+.qz-src{color:var(--muted);font-weight:700;font-size:.9rem}
+.qz-sent{font-size:1.2rem;line-height:1.65;font-weight:600}
+.qz-sent mark{margin:0 .1em;padding:0 .35em}
+.qz-hint{display:inline-block;padding:3px 10px;border-radius:99px;background:#e8edfb;color:#223a9c;font-weight:700;font-size:.9rem}
+.qz-fb{min-height:1.5em;font-weight:700}
+.qz-fb.ok{color:var(--ok)}
+.qz-fb.bad{color:var(--bad)}
+.qz-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.qz-row .btn,.qz>.btn{min-height:52px;font-size:1rem}
+.qz .field input{min-height:52px;font-size:1.1rem}
+.qz .go{min-height:60px}
+
+@media(max-width:560px){
+  #app{padding:12px 12px 40px}
+  .formgrid{grid-template-columns:1fr}
+  .page{padding:18px 14px 16px 50px}
+  .page::before{left:34px}
+  .go{font-size:1.2rem}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+/* bean companion */
+.bean-wrap{display:flex;flex-direction:column;align-items:center;gap:2px}
+.bean{width:118px;height:112px;overflow:visible}
+.bean-cap{font-weight:650;font-size:.98rem}
+.bean-cap small{display:block;font-weight:600;color:var(--bad);font-size:.85rem}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.f-socks{background:#fff8d4;border:2px solid #d9a900;border-radius:14px;padding:12px;font-weight:700}
+.bf .pk,.bf .pa,.bf .pt,.bf .e-h,.bf .e-s,.bf .e-z,.bf .mo-h,.bf .mo-s,.bf .mo-z,.bf .zz{display:none}
+.bf.p-knit .pk,.bf.p-arms .pa,.bf.p-tea .pt,.bf.m-happy .e-h,.bf.m-happy .mo-h,.bf.m-sad .e-s,.bf.m-sad .mo-s,.bf.m-sleep .e-z,.bf.m-sleep .mo-z,.bf.m-sleep .zz{display:inline}
+.bf-eyes{transform-box:fill-box;transform-origin:center;animation:blink 4.6s infinite}
+.bf.m-sad .bf-body{transform:scale(1.03,.94);transform-box:fill-box;transform-origin:50% 100%}
+.bf .nl,.bf .nr{transform-box:fill-box;transform-origin:50% 100%}
+.bf.knitting .nl{animation:needle .5s ease-in-out infinite alternate}
+.bf.knitting .nr{animation:needle .5s ease-in-out infinite alternate-reverse}
+.bf .sock{transform-box:fill-box;transform-origin:50% 0}
+.bf.knitting .sock{animation:sockgrow 14s ease-out infinite}
+.bf .zz{font:800 16px var(--font);fill:var(--c,#2b4bd6);animation:zfloat 2.6s ease-in infinite}
+.bf .st{animation:steam 2.4s ease-out infinite;opacity:0}
+.bean.knit .bf-all,.bean.tea .bf-all{animation:beanbob 2.4s ease-in-out infinite}
+.bean.sleep .bf-all{animation:breathe 3.2s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+@keyframes blink{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
+@keyframes needle{from{transform:rotate(-9deg)}to{transform:rotate(9deg)}}
+@keyframes sockgrow{0%{transform:scaleY(.25)}100%{transform:scaleY(1)}}
+@keyframes beanbob{50%{transform:translateY(-3px)}}
+@keyframes breathe{50%{transform:scale(1.025,.97)}}
+@keyframes zfloat{0%{transform:translate(0,6px);opacity:0}30%{opacity:1}100%{transform:translate(8px,-14px);opacity:0}}
+@keyframes steam{0%{transform:translateY(4px);opacity:0}30%{opacity:.8}100%{transform:translateY(-12px);opacity:0}}
+/* Bean's world */
+.world-sec{margin-top:18px}
+.world-sec h2{font-size:1.2rem;font-weight:800}
+.world{overflow-x:auto;overflow-y:hidden;margin-top:8px;border:2px solid var(--ink);border-radius:16px;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin;background:#9fd8ff}
+.w-svg{display:block;width:1600px;height:300px}
+.w-svg .wsway{animation:wsway 5s ease-in-out infinite}
+.w-svg .cloud{animation:cloudrun var(--d,100s) linear infinite}
+.w-svg .rays{animation:spin 50s linear infinite;transform-origin:110px 66px}
+.w-svg .halo{animation:halo 5s ease-in-out infinite;transform-origin:110px 66px}
+.w-svg .tint{animation:golden 70s ease-in-out infinite}
+.w-svg .sm{animation:smoke 4.5s ease-out infinite;opacity:0;transform-box:fill-box;transform-origin:center}
+.w-svg .win{animation:winglow 3s ease-in-out infinite alternate}
+.w-svg .flame{animation:flame .35s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:50% 100%}
+.w-svg .glow{animation:winglow .5s ease-in-out infinite alternate}
+.w-svg .wob{animation:wob 2.6s ease-in-out infinite}
+.w-svg .wl,.w-svg .wr{animation:wing .16s ease-in-out infinite alternate;transform-box:fill-box}
+.w-svg .wl{transform-origin:100% 50%}.w-svg .wr{transform-origin:0 50%}
+.w-svg .bfly{animation:flutter 22s ease-in-out infinite}
+.w-svg .bird{animation:fly var(--d,32s) linear infinite}
+.w-svg .bw{animation:flap .3s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:100% 100%}
+.w-svg .bw2{transform-origin:0 100%}
+.w-svg .spot{cursor:pointer;outline:none}
+.w-svg .spot.locked .art{opacity:.3;filter:grayscale(1)}
+.w-svg .spot.owned .tag{display:none}
+.w-svg .spot:focus-visible .art{filter:drop-shadow(0 0 5px var(--pen))}
+.w-svg .tag{animation:tagbob 2s ease-in-out infinite}
+.w-svg .spot.can .tag rect{fill:var(--hi)}
+.w-svg .hint{animation:nudge 1.4s ease-in-out infinite}
+.w-svg .say{opacity:0;transition:opacity .25s;pointer-events:none}.w-svg .say.on{opacity:1}
+.w-svg .burst text{font-size:18px;animation:burst .9s ease-out forwards}
+.w-svg [data-bean]{cursor:pointer}
+@keyframes wsway{0%,100%{transform:rotate(-1.6deg)}50%{transform:rotate(1.6deg)}}
+@keyframes cloudrun{from{transform:translateX(-320px)}to{transform:translateX(1900px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes halo{50%{opacity:.55;transform:scale(1.12)}}
+@keyframes golden{0%,100%{opacity:0}50%{opacity:.22}}
+@keyframes smoke{0%{transform:translate(0,0) scale(.5);opacity:0}15%{opacity:.75}100%{transform:translate(22px,-62px) scale(2);opacity:0}}
+@keyframes winglow{from{opacity:.55}to{opacity:1}}
+@keyframes flame{from{transform:scale(1,1) rotate(-3deg)}to{transform:scale(.9,1.12) rotate(3deg)}}
+@keyframes wob{50%{transform:rotate(7deg)}}
+@keyframes wing{from{transform:scaleX(1)}to{transform:scaleX(.25)}}
+@keyframes flap{from{transform:scaleY(1)}to{transform:scaleY(-.6)}}
+@keyframes flutter{0%{transform:translate(180px,150px)}20%{transform:translate(340px,110px)}40%{transform:translate(520px,170px)}60%{transform:translate(740px,120px)}80%{transform:translate(900px,165px)}100%{transform:translate(180px,150px)}}
+@keyframes fly{from{transform:translate(-80px,60px)}50%{transform:translate(800px,30px)}to{transform:translate(1700px,70px)}}
+@keyframes tagbob{50%{transform:translateY(-4px)}}
+@keyframes nudge{50%{transform:translateX(7px)}}
+@keyframes burst{from{transform:translate(0,0) scale(.4);opacity:1}to{transform:translate(var(--dx),var(--dy)) scale(1.3);opacity:0}}
+/* world v2: day and night, weather, animals */
+.w-svg .tint{animation:golden 120s linear infinite}
+.w-svg .night{opacity:0;animation:nightk 120s linear infinite}
+.w-svg .stars,.w-svg .moonb,.w-svg .lights,.w-svg .flies{opacity:0;animation:litk 120s linear infinite}
+.w-svg .sunb{animation:sunk 120s linear infinite}
+.w-svg .star{animation:twinkle 2.6s ease-in-out infinite}
+.w-svg .rainc{opacity:0;animation:rainck 100s linear infinite}
+.w-svg .rainc line{animation:raink .8s linear infinite}
+.w-svg .rb{opacity:0;animation:rbk 100s linear infinite}
+.w-svg .rip{opacity:0;animation:ripple 3.2s ease-out infinite;transform-box:fill-box;transform-origin:center}
+.w-svg .frog{animation:frogk 10s ease-in-out infinite}
+.w-svg .blades{animation:spin 9s linear infinite}
+.w-svg .swing{animation:swingk 3.4s ease-in-out infinite}
+.w-svg .cat{cursor:pointer}
+.w-svg .cat .breath{animation:breathe 3.4s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+.w-svg .cat .tail{animation:tail 3s ease-in-out infinite;transform-box:fill-box;transform-origin:0 100%}
+.w-svg .cat.purr .tail{animation-duration:.35s}
+.w-svg .cat text{font:800 14px var(--font);fill:#6b7aa8;animation:zfloat 3s ease-in infinite}
+.w-svg .snail{animation:crawl 260s linear infinite;animation-delay:-70s}
+.w-svg .stalk{animation:stalk 2s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:50% 100%}
+.w-svg .bun{animation:bunrun 50s linear infinite}
+.w-svg .bh{animation:bunhop .5s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+.w-svg .seed{animation:seedk 16s linear infinite}
+.w-svg .puff{animation:puff .7s ease-out forwards;transform-box:fill-box;transform-origin:center}
+.bf .pom{animation:pom 1.6s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:center}
+@keyframes golden{0%,34%{opacity:0}50%{opacity:.3}62%{opacity:0}94%{opacity:0}97%{opacity:.18}100%{opacity:0}}
+@keyframes nightk{0%,56%{opacity:0}70%,90%{opacity:.55}100%{opacity:0}}
+@keyframes litk{0%,58%{opacity:0}70%,90%{opacity:1}100%{opacity:0}}
+@keyframes sunk{0%,52%{opacity:1}64%,92%{opacity:0}100%{opacity:1}}
+@keyframes twinkle{50%{opacity:.3}}
+@keyframes rainck{0%,40%{opacity:0}44%,52%{opacity:1}57%,100%{opacity:0}}
+@keyframes rbk{0%,50%{opacity:0}57%,68%{opacity:.75}78%,100%{opacity:0}}
+@keyframes raink{from{transform:translate(0,-16px)}to{transform:translate(-26px,300px)}}
+@keyframes ripple{0%{transform:scale(.3);opacity:.9}100%{transform:scale(2.4);opacity:0}}
+@keyframes frogk{0%,40%{transform:translate(0,0)}45%{transform:translate(21px,-15px)}50%,90%{transform:translate(42px,0)}95%{transform:translate(21px,-15px)}100%{transform:translate(0,0)}}
+@keyframes swingk{0%,100%{transform:rotate(-13deg)}50%{transform:rotate(13deg)}}
+@keyframes tail{50%{transform:rotate(-18deg)}}
+@keyframes crawl{from{transform:translateX(-60px)}to{transform:translateX(1660px)}}
+@keyframes stalk{to{transform:rotate(14deg)}}
+@keyframes bunrun{0%{transform:translateX(-90px)}55%,100%{transform:translateX(1700px)}}
+@keyframes bunhop{0%,100%{transform:translateY(0) scale(1.08,.9)}30%{transform:translateY(-4px) scale(.95,1.08)}50%{transform:translateY(-16px)}85%{transform:translateY(0) scale(1.08,.9)}}
+@keyframes seedk{0%{transform:translate(0,0)}25%{transform:translate(160px,-26px)}50%{transform:translate(320px,6px)}75%{transform:translate(480px,-30px)}100%{transform:translate(640px,-4px)}}
+@keyframes ffloat{from{transform:translate(0,0)}50%{transform:translate(30px,-22px)}to{transform:translate(-18px,-40px)}}
+@keyframes puff{0%{transform:scale(.4);opacity:.7}100%{transform:translate(-6px,-8px) scale(1.6);opacity:0}}
+@keyframes pom{to{transform:translate(2px,1px) rotate(12deg)}}
+@media (prefers-reduced-motion:reduce){.bf *,.w-svg *{animation:none!important}}
+@media print{.focus,.toast,#confetti,.modal{display:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <div>
+      <h1>Study Quest</h1>
+      <p class="sub" id="subline">Grade 10 page tracker</p>
+    </div>
+    <div class="chips">
+      <span class="chip flame" id="chipStreak">🔥 0 days</span>
+      <span class="chip" id="chipLevel">Lv 1 Rookie</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="page" id="hero" aria-label="Start studying"></section>
+    <section class="board" id="today" aria-label="Today"></section>
+
+    <section class="world-sec" aria-label="Bean’s world">
+      <div class="row"><h2>🫘 Bean’s world</h2><span class="chip" id="beanCount"></span></div>
+      <div class="world" id="beanHome" tabindex="0" aria-label="Bean’s world. Scroll sideways to explore."></div>
+      <p class="muted small" style="margin-top:6px">Swipe sideways to explore. Day turns to night, and it sometimes rains. Earn socks with timer rounds, then tap a faded item to buy it. Try tapping the cat!</p>
+    </section>
+
+    <div class="folds">
+      <details class="fold" id="weekFold">
+        <summary><span>This week</span><span class="count" id="weekCount"></span></summary>
+        <div class="body" id="week"></div>
+      </details>
+
+      <details class="fold" id="badgeFold">
+        <summary><span>Badges</span><span class="count" id="badgeCount"></span></summary>
+        <div class="body"><div class="badges" id="badges"></div></div>
+      </details>
+
+      <details class="fold" id="subjFold">
+        <summary><span>All subjects</span><span class="count" id="subjCount"></span></summary>
+        <div class="body">
+          <label class="check"><input type="checkbox" id="hidedone"> Hide finished subjects</label>
+          <div id="subjects"></div>
+        </div>
+      </details>
+
+      <details class="fold" id="manualFold">
+        <summary><span>Update pages yourself</span></summary>
+        <div class="body">
+          <p class="muted small" style="margin-bottom:12px">Enter the last page you finished, or tap a quick button to add pages.</p>
+          <div class="formgrid">
+            <div class="field"><label for="subjectpick">Subject</label><select id="subjectpick"></select></div>
+            <div class="field"><label for="lastpage">Last page studied</label><input id="lastpage" type="number" min="0" step="1" placeholder="e.g. 95"></div>
+          </div>
+          <div class="actions">
+            <button class="btn sm" data-qa="1">+1</button>
+            <button class="btn sm" data-qa="5">+5</button>
+            <button class="btn sm" data-qa="10">+10</button>
+          </div>
+          <div class="actions">
+            <button class="btn primary" id="save">Save progress</button>
+            <button class="btn" id="markdone">Mark subject complete</button>
+            <button class="btn danger" id="clearone">Clear this subject</button>
+          </div>
+          <p id="feedback" class="muted" aria-live="polite" style="margin-top:10px">Select a subject and save the last page you have actually studied.</p>
+        </div>
+      </details>
+
+      <details class="fold" id="setup">
+        <summary><span>Setup</span></summary>
+        <div class="body">
+          <div class="formgrid">
+            <div class="field"><label for="quarter">Test quarter</label>
+              <select id="quarter">
+                <option value="1">1st quarter</option><option value="2" selected>2nd quarter</option>
+                <option value="3">3rd quarter</option><option value="4">4th quarter</option>
+              </select>
+            </div>
+            <div class="field"><label for="testdate">Upcoming test date</label><input id="testdate" type="date"></div>
+            <div class="field"><label for="hardestpick">My hardest subject</label><select id="hardestpick"></select></div>
+            <div class="field"><label for="rewards">Rewards after a round (separate with commas)</label><input id="rewards" type="text"></div>
+          </div>
+          <label class="check" style="margin-top:8px"><input type="checkbox" id="soundopt"> Beep when the timer ends</label>
+          <p id="datehint" class="muted small" aria-live="polite">Choose your test date to see how many days remain.</p>
+        </div>
+      </details>
+
+      <details class="fold" id="backup">
+        <summary><span>Backup and reset</span></summary>
+        <div class="body">
+          <p class="muted">Your progress is saved on this device and browser. Export a backup now and then, especially before clearing browser data. The backup includes page offsets and quiz results. Book PDFs stay on this device and are not included.</p>
+          <div class="actions">
+            <button class="btn" id="export">Export progress backup</button>
+            <label for="importfile" class="btn" style="display:inline-flex;align-items:center;margin:0;cursor:pointer">Import backup</label>
+            <input id="importfile" type="file" accept="application/json" style="display:none">
+            <button class="btn danger" id="reset">Reset everything</button>
+          </div>
+          <p class="muted small" style="margin-top:10px">You can also print this page from your browser if you want a paper copy.</p>
+        </div>
+      </details>
+    </div>
+
+    <footer>Page ranges are based on the Grade 10 Portion Division document you provided, for Gibson School Systems 2026/2027. Check your teacher's instructions in case the assigned portion changes.</footer>
+  </main>
+</div>
+
+<div id="focus" class="focus" hidden role="dialog" aria-modal="true" aria-label="Study timer"><div class="fpage" id="fbody"></div></div>
+<div id="modal" class="modal" hidden role="dialog" aria-modal="true" aria-label="Choose"><div class="modal-box" id="modalBox"></div></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<script>
+(() => {
+  'use strict';
+  const STORAGE_KEY = 'grade10-test2-page-tracker-v1';
+  const BASE_TITLE = document.title;
+  const XP_PAGE = 10, XP_SESSION = 25, XP_SUBJECT = 100, XP_BADGE = 50, XP_QUIZ = 5, XP_QUIZ_RIGHT = 2;
+  const DEFAULT_REWARDS = '🍪 A snack, 📺 One short video, 🎮 One game round, 🚶 A quick walk';
+  const REDUCED = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // T2 page ranges transcribed from the provided Grade 10 portion division document.
+  const subjects = [
+    {name:'Amharic', emoji:'📝', hue:335, ranges:[[1,30],[48,84],[85,111],[126,151]]},
+    {name:'Math', emoji:'📐', hue:225, ranges:[[1,67],[81,170],[171,239],[255,364]]},
+    {name:'Physics', emoji:'⚡', hue:265, ranges:[[1,45],[59,116],[117,175],[190,244]]},
+    {name:'Chemistry', emoji:'🧪', hue:165, ranges:[[1,46],[60,105],[106,164],[197,296]]},
+    {name:'Biology', emoji:'🧬', hue:130, ranges:[[1,40],[51,95],[96,136],[143,174]]},
+    {name:'Citizenship', emoji:'🤝', hue:22, ranges:[[1,53],[64,113],[114,144],[154,211]]},
+    {name:'Geography', emoji:'🌍', hue:190, ranges:[[1,37],[55,100],[101,136],[151,195]]},
+    {name:'Integrated English', emoji:'📖', hue:300, ranges:[[1,33],[34,65],[48,86],[99,229]]},
+    {name:'Computer Education', emoji:'💻', hue:205, ranges:[[1,45],[62,101],[102,160],[178,224]]},
+    {name:'Economics', emoji:'📈', hue:42, ranges:[[1,28],[49,87],[88,113],[134,184]]},
+    {name:'History', emoji:'🏺', hue:6, ranges:[[1,37],[44,110],[111,163],[170,228]]},
+    {name:'Afaan Oromoo', emoji:'💬', hue:80, ranges:[[1,15],[25,47],[48,70],[82,102]]}
+  ];
+  const MODES = {
+    sprint:{label:'Just 10 minutes', work:10},
+    pomodoro:{label:'Pomodoro', work:25, brk:5},
+    hardest:{label:'Hardest subject first', work:10}
+  };
+  const BADGES = [
+    {id:'first', e:'🌱', n:'First step', d:'Log your first page', t:s=>s.pages>=1},
+    {id:'p50', e:'📘', n:'First 50 pages', d:'Study 50 pages in total', t:s=>s.pages>=50},
+    {id:'p200', e:'📚', n:'200 pages', d:'Study 200 pages in total', t:s=>s.pages>=200},
+    {id:'p500', e:'🏔️', n:'500 pages', d:'Study 500 pages in total', t:s=>s.pages>=500},
+    {id:'fin1', e:'🏁', n:'Subject finished', d:'Finish every page of one subject', t:s=>s.fin>=1},
+    {id:'fin3', e:'🏆', n:'Triple finish', d:'Finish three subjects', t:s=>s.fin>=3},
+    {id:'str3', e:'🔥', n:'3 days in a row', d:'Study three days running', t:s=>s.streak>=3},
+    {id:'str7', e:'🚀', n:'One-week streak', d:'Study seven days running', t:s=>s.streak>=7},
+    {id:'early', e:'🌅', n:'Early bird', d:'Study before 8 AM', t:s=>s.early},
+    {id:'focus1', e:'⏱️', n:'First focus round', d:'Finish a full timer', t:s=>s.sessions>=1},
+    {id:'pomo3', e:'🍅', n:'Pomodoro pro', d:'Finish three 25-minute rounds', t:s=>s.pomos>=3},
+    {id:'half', e:'🌗', n:'Halfway there', d:'Cover 50% of the quarter', t:s=>s.pct>=50},
+    {id:'ready', e:'🎓', n:'Test ready', d:'Cover 100% of the quarter', t:s=>s.pct>=100}
+  ];
+  const RANKS = [[1,'Rookie'],[3,'Learner'],[5,'Scholar'],[8,'Master'],[10,'Top of the Class']];
+
+  const $ = id => document.getElementById(id);
+  const byName = n => subjects.find(s => s.name === n);
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const isObj = v => v && typeof v === 'object' && !Array.isArray(v);
+  const num = (v, d = 0) => { v = Number(v); return Number.isFinite(v) ? v : d; };
+  const pad = n => String(n).padStart(2, '0');
+  const dayKey = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  const todayKey = () => dayKey(new Date());
+  const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+  const ord = q => ['1st','2nd','3rd','4th'][q - 1] || q + 'th';
+  const sv = s => `--c:hsl(${s.hue} 60% 32%);--t:hsl(${s.hue} 85% 95%)`;
+  const fmt = ms => { const t = Math.max(0, Math.ceil(ms / 1000)); return pad(Math.floor(t / 60)) + ':' + pad(t % 60); };
+
+  /* ---------- state ---------- */
+  function defaultState() {
+    return {quarter:2, date:'', progress:{}, credited:{}, xp:0, totalPages:0, days:{}, badges:{}, bestStreak:0,
+      sessions:0, pomodoros:0, early:false, hideDone:true, hardest:'', rewards:DEFAULT_REWARDS, sound:true, timer:null,
+      offsets:{}, quiz:[], quizBlocklist:[], socks:0, decor:{}};
+  }
+  function normalize(p) {
+    const d = defaultState();
+    if (!isObj(p)) return d;
+    const s = {...d};
+    s.quarter = [1,2,3,4].includes(Number(p.quarter)) ? Number(p.quarter) : 2;
+    s.date = typeof p.date === 'string' ? p.date : '';
+    s.progress = isObj(p.progress) ? {...p.progress} : {};
+    s.credited = isObj(p.credited) ? {...p.credited} : {};
+    s.xp = Math.max(0, num(p.xp));
+    s.totalPages = Math.max(0, num(p.totalPages));
+    s.days = {};
+    if (isObj(p.days)) for (const k in p.days) {
+      const v = p.days[k];
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(k) || !isObj(v)) continue;
+      s.days[k] = {p:num(v.p), q:isObj(v.q) ? {...v.q} : {}, s:num(v.s), m:num(v.m)};
+    }
+    s.badges = isObj(p.badges) ? {...p.badges} : {};
+    s.bestStreak = num(p.bestStreak);
+    s.sessions = num(p.sessions);
+    s.pomodoros = num(p.pomodoros);
+    s.early = !!p.early;
+    s.offsets = {};
+    if (isObj(p.offsets)) for (const k in p.offsets) { const n = Number(p.offsets[k]); if (byName(k) && Number.isInteger(n) && Math.abs(n) < 5000) s.offsets[k] = n; }
+    s.quizBlocklist = Array.isArray(p.quizBlocklist) ? [...new Set(p.quizBlocklist.filter(x => typeof x === 'string').map(x => x.trim()).filter(Boolean).slice(0,2000))] : [];
+    s.quiz = Array.isArray(p.quiz) ? p.quiz.filter(x => isObj(x) && byName(x.s) && typeof x.d === 'string').slice(-2000).map(x => ({s:x.s, q:num(x.q), p:num(x.p), ok:!!x.ok, d:x.d})) : [];
+    s.hideDone = p.hideDone !== false;
+    s.sound = p.sound !== false;
+    s.socks = Math.max(0, num(p.socks));
+    s.decor = {};
+    if (isObj(p.decor)) for (const k in p.decor) if (/^[a-z]{2,12}$/.test(k) && p.decor[k]) s.decor[k] = true;
+    s.hardest = byName(p.hardest) ? p.hardest : '';
+    s.rewards = typeof p.rewards === 'string' && p.rewards.trim() ? p.rewards : DEFAULT_REWARDS;
+    const t = p.timer;
+    s.timer = isObj(t) && byName(t.subject) && MODES[t.mode] && ['running','paused','done'].includes(t.stage) && ['work','break'].includes(t.phase) ? {...t} : null;
+    return s;
+  }
+  let state = defaultState();
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) state = normalize(JSON.parse(saved));
+  } catch (e) {}
+
+  const currentQuarter = () => Number($('quarter').value);
+  const rangeFor = s => s.ranges[currentQuarter() - 1];
+  const keyFor = name => currentQuarter() + '|' + name;
+  const countFor = r => r[1] - r[0] + 1;
+  function saveState() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {} }
+  function studiedCount(s) {
+    const r = rangeFor(s), p = state.progress[keyFor(s.name)];
+    if (p == null) return 0;
+    return Math.max(0, Math.min(countFor(r), Number(p) - r[0] + 1));
+  }
+  function lastEffective(s) {
+    const r = rangeFor(s), p = state.progress[keyFor(s.name)];
+    return p == null ? r[0] - 1 : Math.max(r[0] - 1, Math.min(r[1], Number(p)));
+  }
+  const isFinished = s => studiedCount(s) >= countFor(rangeFor(s));
+  function overall() {
+    let total = 0, covered = 0;
+    subjects.forEach(s => { total += countFor(rangeFor(s)); covered += studiedCount(s); });
+    return {total, covered, remaining:total - covered, pct:total ? Math.round(covered / total * 100) : 0};
+  }
+  // Least-covered subjects first; that is who needs you most.
+  function smartList() {
+    return subjects.map(s => { const c = countFor(rangeFor(s)), st = studiedCount(s); return {s, pct:st / c, left:c - st}; })
+      .filter(x => x.left > 0).sort((a, b) => a.pct - b.pct || b.left - a.left).map(x => x.s);
+  }
+  // Pages studied before the gamified version existed still count toward XP, but not toward "today".
+  function migrateLegacy() {
+    for (const key in state.progress) {
+      if (state.credited[key] != null) continue;
+      const [q, name] = key.split('|'), s = byName(name);
+      const r = s && s.ranges[Number(q) - 1];
+      if (!r) continue;
+      const studied = Math.max(0, Math.min(countFor(r), Number(state.progress[key]) - r[0] + 1)) || 0;
+      state.credited[key] = studied;
+      state.totalPages += studied;
+      state.xp += studied * XP_PAGE;
+    }
+  }
+
+  /* ---------- levels, streaks, targets ---------- */
+  const xpFor = n => 50 * n * (n - 1);
+  function levelOf(xp) { let n = 1; while (xp >= xpFor(n + 1)) n++; return n; }
+  function rankOf(l) { let r = RANKS[0][1]; RANKS.forEach(([min, name]) => { if (l >= min) r = name; }); return r; }
+  const dayData = k => state.days[k] || {p:0, q:{}, s:0, m:0};
+  const studiedOn = k => { const d = state.days[k]; return !!d && (d.p > 0 || d.s > 0); };
+  function getToday() { const k = todayKey(); return state.days[k] || (state.days[k] = {p:0, q:{}, s:0, m:0}); }
+  function streakInfo() {
+    let d = new Date(); d.setHours(12, 0, 0, 0);
+    const todayDone = studiedOn(dayKey(d));
+    if (!todayDone) d = addDays(d, -1);
+    let n = 0;
+    while (studiedOn(dayKey(d))) { n++; d = addDays(d, -1); }
+    return {n, todayDone};
+  }
+  function updateBest() { const n = streakInfo().n; if (n > state.bestStreak) state.bestStreak = n; }
+  function daysUntil(date) {
+    const t = new Date(date + 'T00:00:00'), n = new Date(); n.setHours(0, 0, 0, 0);
+    return Math.round((t - n) / 86400000);
+  }
+  function targetInfo() {
+    if (!state.date) return null;
+    const days = daysUntil(state.date);
+    if (!Number.isFinite(days)) return null;
+    if (days < 0) return {past:true};
+    const o = overall(), q = currentQuarter();
+    const pagesToday = dayData(todayKey()).q[q] || 0;
+    if (o.remaining === 0 && pagesToday === 0) return {days, finished:true, target:0, pagesToday:0};
+    const studyDays = Math.max(1, days);
+    const target = Math.ceil((o.remaining + pagesToday) / studyDays);
+    let prev = 0;
+    for (let i = 1; i <= 7; i++) prev += dayData(dayKey(addDays(new Date(), -i))).p;
+    const avg = prev / 7;
+    const done = pagesToday >= target;
+    return {days, studyDays, target, pagesToday, left:Math.max(0, target - pagesToday), done, avg, onTrack:done || avg >= target, rem:o.remaining};
+  }
+  const targetDone = () => { const t = targetInfo(); return !!(t && t.target > 0 && t.done); };
+
+  /* ---------- badges ---------- */
+  function badgeStats() {
+    let fin = 0;
+    subjects.forEach(s => s.ranges.forEach((r, i) => { if ((state.credited[(i + 1) + '|' + s.name] || 0) >= countFor(r)) fin++; }));
+    return {pages:state.totalPages, fin, streak:Math.max(streakInfo().n, state.bestStreak), early:state.early,
+      sessions:state.sessions, pomos:state.pomodoros, pct:overall().pct};
+  }
+  function checkBadges(info, silent) {
+    const st = badgeStats();
+    BADGES.forEach(b => {
+      if (!state.badges[b.id] && b.t(st)) {
+        state.badges[b.id] = todayKey();
+        if (!silent) { state.xp += XP_BADGE; info.lines.push(`${b.e} Badge: ${b.n}`); info.big = true; }
+      }
+    });
+  }
+  function markEarly(ts) { if (new Date(ts || Date.now()).getHours() < 8) state.early = true; }
+
+  /* ---------- actions (every change goes through act so it can be undone) ---------- */
+  function act(fn, opt = {}) {
+    const snap = JSON.stringify({...state, timer:null});
+    const lvl0 = levelOf(state.xp), xp0 = state.xp, td0 = targetDone();
+    const info = {lines:[], big:false};
+    fn(info);
+    if (!td0 && targetDone()) { info.lines.push('🎯 Daily target hit!'); info.big = true; }
+    checkBadges(info);
+    const dx = state.xp - xp0, lvl1 = levelOf(state.xp);
+    if (lvl1 > lvl0) { info.lines.push(`⬆️ Level ${lvl1}: ${rankOf(lvl1)}`); info.big = true; }
+    updateBest();
+    render();
+    if (info.big) confetti();
+    const [first, ...rest] = info.lines;
+    const msg = [first, dx > 0 ? `+${dx} XP` : '', ...rest].filter(Boolean).join(' · ');
+    if (msg) toast(msg, opt.undo === false ? null : snap);
+    return info;
+  }
+  function undo(snap) {
+    const t = state.timer, quiz = state.quiz, offsets = state.offsets;
+    state = normalize(JSON.parse(snap));
+    state.timer = t; state.quiz = quiz; state.offsets = offsets;
+    render();
+    toast('Undone.');
+  }
+  function setLast(name, n, info) {
+    const s = byName(name), r = rangeFor(s), key = keyFor(name), count = countFor(r);
+    state.progress[key] = n;
+    const after = studiedCount(s), prev = state.credited[key] || 0;
+    let gain = 0;
+    if (after > prev) {
+      gain = after - prev;
+      state.credited[key] = after;
+      const d = getToday(), q = currentQuarter();
+      d.p += gain; d.q[q] = (d.q[q] || 0) + gain;
+      state.totalPages += gain; state.xp += gain * XP_PAGE;
+      markEarly();
+      if (prev < count && after >= count) {
+        state.xp += XP_SUBJECT; info.big = true;
+        info.lines.push(`${s.emoji} ${name} finished! +${XP_SUBJECT} XP`);
+      }
+    }
+    info.lines.unshift(gain > 0 ? `${s.emoji} ${name} +${gain} page${gain > 1 ? 's' : ''}, now at page ${Math.min(n, r[1])}` : `${name}: saved page ${n}`);
+    return gain;
+  }
+  function quickAdd(name, n) {
+    const s = byName(name), r = rangeFor(s), base = lastEffective(s);
+    if (base >= r[1]) { toast(`${name} is already finished 🎉`); return 0; }
+    let gain = 0;
+    act(info => { gain = setLast(name, Math.min(r[1], base + n), info); });
+    return gain;
+  }
+
+  /* ---------- toast, confetti, sound, modal ---------- */
+  let toastTimer;
+  function toast(msg, snap) {
+    const el = $('toast');
+    el.innerHTML = '';
+    const sp = document.createElement('span'); sp.textContent = msg; el.append(sp);
+    if (snap) { const b = document.createElement('button'); b.type = 'button'; b.textContent = 'Undo'; b.onclick = () => { el.classList.remove('show'); undo(snap); }; el.append(b); }
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), snap ? 7000 : 4000);
+  }
+  let confettiRaf = 0;
+  function confetti() {
+    if (REDUCED) return;
+    const c = $('confetti'), ctx = c.getContext('2d'), w = innerWidth, h = innerHeight, dpr = Math.min(2, devicePixelRatio || 1);
+    c.width = w * dpr; c.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const colors = ['#ffd93d','#2b4bd6','#ff7a1a','#0f7a5a','#e5484d','#8a5cf6'];
+    const P = Array.from({length:140}, () => ({x:w / 2 + (Math.random() - .5) * w * .3, y:h * .55, vx:(Math.random() - .5) * 14, vy:-Math.random() * 16 - 6,
+      s:5 + Math.random() * 7, r:Math.random() * 6, vr:(Math.random() - .5) * .4, c:colors[Math.random() * colors.length | 0]}));
+    const t0 = performance.now();
+    cancelAnimationFrame(confettiRaf);
+    (function frame(now) {
+      const t = now - t0;
+      ctx.clearRect(0, 0, w, h);
+      P.forEach(p => {
+        p.vy += .45; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c; ctx.globalAlpha = Math.max(0, 1 - t / 2600);
+        ctx.fillRect(-p.s / 2, -p.s / 3, p.s, p.s * .6); ctx.restore();
+      });
+      if (t < 2600) confettiRaf = requestAnimationFrame(frame); else ctx.clearRect(0, 0, w, h);
+    })(t0);
+  }
+  let audioCtx = null;
+  function unlockAudio() {
+    try { const AC = window.AudioContext || window.webkitAudioContext; if (AC) { audioCtx = audioCtx || new AC(); if (audioCtx.state === 'suspended') audioCtx.resume(); } } catch (e) {}
+  }
+  function beep() {
+    if (state.sound && audioCtx) {
+      try {
+        [0, .28, .56].forEach((d, i) => {
+          const o = audioCtx.createOscillator(), g = audioCtx.createGain(), t = audioCtx.currentTime + d;
+          o.type = 'sine'; o.frequency.value = i === 2 ? 988 : 784;
+          g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.25, t + .02); g.gain.exponentialRampToValueAtTime(.0001, t + .25);
+          o.connect(g); g.connect(audioCtx.destination); o.start(t); o.stop(t + .27);
+        });
+      } catch (e) {}
+    }
+    try { if (navigator.vibrate && (!navigator.userActivation || navigator.userActivation.hasBeenActive)) navigator.vibrate([200, 100, 200]); } catch (e) {}
+  }
+  let lastFocus = null, modalSticky = false;
+  function syncInert() {
+    const f = !$('focus').hidden, m = !$('modal').hidden;
+    $('app').inert = f || m; $('focus').inert = m;
+  }
+  function openModal(title, build, opt) {
+    lastFocus = document.activeElement; modalSticky = !!(opt && opt.sticky);
+    const box = $('modalBox'); box.innerHTML = '';
+    const h = document.createElement('h2'); h.textContent = title; box.append(h);
+    build(box);
+    $('modal').hidden = false; syncInert();
+    const first = box.querySelector('button,textarea,input'); if (first) first.focus();
+  }
+  function closeModal() {
+    $('modal').hidden = true; syncInert();
+    if (lastFocus && document.contains(lastFocus)) lastFocus.focus();
+  }
+  $('modal').addEventListener('click', e => { if (e.target === $('modal') && !modalSticky) closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('modal').hidden) closeModal(); });
+  function pickSubject(title, cb, opt = {}) {
+    openModal(title, box => {
+      const list = document.createElement('div'); list.className = 'picklist';
+      const items = opt.all ? subjects : smartList();
+      items.forEach(s => {
+        const c = countFor(rangeFor(s)), pct = Math.round(studiedCount(s) / c * 100);
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'pick'; b.style.cssText = sv(s);
+        b.textContent = `${s.emoji} ${s.name} (${pct}% done)`;
+        b.onclick = () => { closeModal(); cb(s.name); };
+        list.append(b);
+      });
+      box.append(list);
+      const x = document.createElement('button'); x.type = 'button'; x.className = 'btn'; x.textContent = 'Cancel'; x.onclick = closeModal; box.append(x);
+    });
+  }
+  async function shareStreak() {
+    const st = streakInfo(), lv = levelOf(state.xp), o = overall();
+    const streakText = st.n > 0 ? `${st.n}-day study streak` : 'just starting my study streak';
+    const text = `🔥 ${streakText}! Level ${lv} ${rankOf(lv)}, ${o.covered} of ${o.total} pages covered for my ${ord(currentQuarter())} quarter test. Can you beat my streak?`;
+    try { if (navigator.share) { await navigator.share({text}); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+    try { await navigator.clipboard.writeText(text); toast('Copied. Paste it to a friend.'); return; } catch (e) {}
+    openModal('Send this to a friend', box => {
+      const ta = document.createElement('textarea'); ta.value = text; ta.readOnly = true; ta.setAttribute('aria-label', 'Message to copy');
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'btn'; b.textContent = 'Close'; b.onclick = closeModal;
+      box.append(ta, b); ta.focus(); ta.select();
+    });
+  }
+
+  /* ---------- rendering ---------- */
+  let pickIdx = 0;
+  function renderHeader() {
+    const q = currentQuarter(), st = streakInfo(), lv = levelOf(state.xp);
+    $('subline').textContent = `Gibson School Systems, ${ord(q)} quarter pages`;
+    const cs = $('chipStreak');
+    cs.textContent = `🔥 ${st.n} day${st.n === 1 ? '' : 's'}`;
+    cs.classList.toggle('cold', st.n === 0);
+    cs.classList.toggle('flame', st.n > 0);
+    cs.title = st.n > 0 ? `Best streak: ${Math.max(state.bestStreak, st.n)} days` : 'Study today to start a streak';
+    $('chipLevel').textContent = `Lv ${lv} ${rankOf(lv)}`;
+  }
+  function renderHero() {
+    const el = $('hero'), list = smartList();
+    if (!list.length) {
+      el.innerHTML = '<div class="alldone"><h2>🎓 Every page is covered</h2><p>Now test yourself: close the book and write down what you remember from your hardest subject.</p></div>';
+      return;
+    }
+    const idx = pickIdx % list.length, s = list[idx], r = rangeFor(s), c = countFor(r), st = studiedCount(s), pct = Math.round(st / c * 100);
+    const base = lastEffective(s), a = base + 1, b = Math.min(r[1], base + 5);
+    const goal = a === b ? `page ${a}` : `pages ${a} to ${b}`;
+    const why = idx === 0 ? (st === 0 ? "You haven't touched this one yet." : 'It has the lowest % done, so it needs you most.') : 'Your pick for this round.';
+    const hs = byName(state.hardest);
+    el.innerHTML = `
+      <div class="nu" style="${sv(s)}"><span class="spine">${s.emoji}</span>
+        <div><h2 class="nu-name"><mark>${esc(s.name)}</mark></h2>
+        <p class="nu-meta">${pct}% done, ${c - st} pages left. ${esc(why)}</p></div></div>
+      <p class="tiny">Read ${goal}, then you're allowed to stop.</p>
+      <button class="go" id="goSprint" data-h="sprint" type="button">▶ Just 10 minutes</button>
+      <div class="alt">
+        <button class="btn" data-h="pomo" type="button"><span class="em" aria-hidden="true">🍅</span>Pomodoro 25 + 5</button>
+        <button class="btn" data-h="hard" type="button"><span class="em" aria-hidden="true">🧗</span>Hardest first${hs ? ': ' + esc(hs.name) : ''}</button>
+        <button class="btn" data-h="swap" type="button"><span class="em" aria-hidden="true">🎲</span>Swap subject</button>
+      </div>`;
+  }
+  function renderToday() {
+    const o = overall(), t = targetInfo(), lv = levelOf(state.xp), st = streakInfo(), q = currentQuarter();
+    const pagesToday = dayData(todayKey()).q[q] || 0;
+    let top;
+    if (!t) {
+      top = `<div><div class="numline"><span class="num">${pagesToday}</span><span>pages today</span></div>
+        <p class="muted" style="margin-top:8px">Add your test date and I'll work out how many pages to read each day.</p>
+        <div class="actions"><button class="btn sm" id="tdSetDate" type="button">Set test date</button></div></div>`;
+    } else if (t.past) {
+      top = `<div><div class="numline"><span class="num">${pagesToday}</span><span>pages today</span></div>
+        <p class="muted" style="margin-top:8px">That test date has passed. Pick the next one in Setup.</p>
+        <div class="actions"><button class="btn sm" id="tdSetDate" type="button">Change test date</button></div></div>`;
+    } else if (t.finished) {
+      top = `<div><div class="numline"><span class="num">🎓</span><span>All pages covered</span></div>
+        <p class="muted" style="margin-top:8px">${t.days === 0 ? 'Your test is today. Good luck!' : t.days + ' day' + (t.days === 1 ? '' : 's') + ' until your test. Use them to revise.'}</p></div>`;
+    } else {
+      const w = Math.min(100, Math.round(t.pagesToday / t.target * 100));
+      const pill = t.done
+        ? '<span class="pill ok">✅ Target hit, you are on track</span>'
+        : t.onTrack
+          ? '<span class="pill ok">✅ On track at your usual pace</span>'
+          : '<span class="pill bad">🔴 Behind, catch up today</span>';
+      const line = t.done ? `${t.rem} pages left overall.`
+        : `Read ${t.left} more page${t.left === 1 ? '' : 's'} today to stay on track. Your 7-day average is ${t.avg.toFixed(1)} pages a day.`;
+      top = `<div><div class="numline"><span class="num">${t.pagesToday} / ${t.target}</span><span>pages today</span></div>
+        <div class="strip" role="progressbar" aria-label="Today's page target" aria-valuemin="0" aria-valuemax="${t.target}" aria-valuenow="${Math.min(t.pagesToday, t.target)}"><i style="width:${w}%"></i></div>
+        <p>${pill}</p>
+        <p class="muted small">${t.days === 0 ? 'Your test is today.' : t.days + ' day' + (t.days === 1 ? '' : 's') + ' until your test.'} ${esc(line)}</p></div>`;
+    }
+    const xpCur = state.xp - xpFor(lv), xpSpan = xpFor(lv + 1) - xpFor(lv), xpPct = Math.round(xpCur / xpSpan * 100);
+    const streakLine = st.todayDone ? `🔥 Streak is safe for today. Best so far: ${Math.max(state.bestStreak, st.n)} day${Math.max(state.bestStreak, st.n) === 1 ? '' : 's'}.`
+      : st.n > 0 ? `🔥 Do one page or one timer today to keep your ${st.n}-day streak alive.`
+      : '🔥 Do one page or one timer today to start a streak.';
+    const mid = `<div><div class="row"><strong>Level ${lv}, ${esc(rankOf(lv))}</strong><span class="muted small">${state.xp} XP</span></div>
+      <div class="strip xp" role="progressbar" aria-label="Progress to next level" aria-valuemin="0" aria-valuemax="${xpSpan}" aria-valuenow="${xpCur}"><i style="width:${xpPct}%"></i></div>
+      <p class="muted small">${xpSpan - xpCur} XP to Level ${lv + 1}. Each page earns ${XP_PAGE} XP.</p>
+      <p class="small" style="margin-top:8px">${streakLine}</p>
+      <div class="actions"><button class="btn sm" id="shareBtn" type="button">Send my streak to a friend</button></div></div>`;
+    const bot = `<div><div class="row"><strong>Overall</strong><span class="muted small">${o.covered} of ${o.total} pages, ${o.remaining} left</span></div>
+      <div class="strip all" role="progressbar" aria-label="Overall progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${o.pct}"><i style="width:${o.pct}%"></i></div>
+      <p class="small"><strong>${o.pct}%</strong> of the ${ord(q)} quarter studied</p></div>`;
+    $('today').innerHTML = top + mid + bot;
+    const dh = $('datehint');
+    if (state.date && Number.isFinite(daysUntil(state.date))) {
+      const days = daysUntil(state.date);
+      dh.textContent = days < 0 ? 'That test date is in the past.' : days === 0 ? 'Your test is today!' : days + ' day' + (days === 1 ? '' : 's') + ' until your test.';
+    } else dh.textContent = 'Choose your test date to see how many days remain.';
+  }
+  function renderWeek() {
+    const noon = new Date(); noon.setHours(12, 0, 0, 0);
+    const t = targetInfo(), goal = t && t.target > 0 ? t.target : 0;
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = addDays(noon, -i), k = dayKey(d), x = dayData(k);
+      days.push({k, p:x.p, m:x.m, today:i === 0, label:i === 0 ? 'Today' : d.toLocaleDateString(undefined, {weekday:'short'}), long:i === 0 ? 'Today' : d.toLocaleDateString(undefined, {weekday:'long'})});
+    }
+    const total = days.reduce((a, x) => a + x.p, 0), mins = days.reduce((a, x) => a + x.m, 0), active = days.filter(x => studiedOn(x.k)).length;
+    const max = Math.max(5, goal, ...days.map(x => x.p));
+    const best = days.reduce((a, x) => x.p > a.p ? x : a, days[0]);
+    const cols = days.map(x => {
+      const showVal = x.p > 0 && (x.p === best.p || x.today);
+      return `<div class="col${x.today ? ' today' : ''}" tabindex="0" data-tip="${esc(x.long)}: ${x.p} page${x.p === 1 ? '' : 's'}" aria-label="${esc(x.long)}: ${x.p} pages">
+        <div class="plot"><span class="val">${showVal ? x.p : ''}</span><i style="height:calc((var(--h) - 22px) * ${(x.p / max).toFixed(3)});${x.p > 0 ? 'min-height:3px' : ''}"></i></div><b>${esc(x.label)}</b></div>`;
+    }).join('');
+    const goalLine = goal ? `<div class="goalline" style="bottom:calc(28px + (var(--h) - 22px) * ${(goal / max).toFixed(3)})"><span>goal ${goal}</span></div>` : '';
+    const empty = total === 0 && mins === 0;
+    $('week').innerHTML = `<div class="chart-wrap"><div class="chart" role="group" aria-label="Pages studied each day this week">${cols}</div>${goalLine}</div>
+      <p class="muted">${empty ? 'Nothing logged yet this week. One page today starts your first bar.'
+        : `${total} page${total === 1 ? '' : 's'} and ${mins} minute${mins === 1 ? '' : 's'} of focus over ${active} study day${active === 1 ? '' : 's'}.${best.p > 0 ? ' Best day: ' + best.long + ' with ' + best.p + '.' : ''}`}</p>`;
+    $('weekCount').textContent = `${total} page${total === 1 ? '' : 's'}`;
+  }
+  function renderBadges() {
+    let got = 0;
+    $('badges').innerHTML = BADGES.map(b => {
+      const on = !!state.badges[b.id]; if (on) got++;
+      return `<div class="badge${on ? ' on' : ''}"><span class="e" aria-hidden="true">${b.e}</span><b>${esc(b.n)}</b><span class="d">${on ? 'Earned ' + esc(state.badges[b.id]) : esc(b.d)}</span>${on ? '' : '<span style="position:absolute;left:-9999px">Locked</span>'}</div>`;
+    }).join('');
+    $('badgeCount').textContent = `${got} of ${BADGES.length}`;
+  }
+  function renderSubjects() {
+    const done = [], open = [];
+    subjects.forEach(s => (isFinished(s) ? done : open).push(s));
+    const rows = (state.hideDone ? open : subjects).map(s => {
+      const r = rangeFor(s), c = countFor(r), st = studiedCount(s), pct = Math.round(st / c * 100), last = state.progress[keyFor(s.name)];
+      const status = last == null ? 'Not started' : last < r[0] ? `Saved last page: ${last} (before this portion)` : `Last page saved: ${Math.min(last, r[1])}`;
+      const fin = st >= c;
+      return `<article class="subj" style="${sv(s)}"><span class="spine">${s.emoji}</span><div>
+        <div class="row"><h3>${esc(s.name)}</h3><strong>${pct}%</strong></div>
+        <p class="meta">Pages ${r[0]}–${r[1]} (${c} pages)</p>
+        <div class="strip"><i style="width:${pct}%"></i></div>
+        <div class="row small"><span>${st} studied</span><span>${c - st} remaining</span></div>
+        <p class="meta" style="margin-top:2px">${fin ? '✅ Finished' : esc(status)}</p>
+        <div class="acts">
+          ${fin ? '' : `<button class="btn sm" data-add="5" data-name="${esc(s.name)}" type="button">+5</button><button class="btn sm" data-add="10" data-name="${esc(s.name)}" type="button">+10</button>`}
+          <button class="btn sm" data-edit="${esc(s.name)}" type="button">Update</button></div>
+        <div class="acts"><button class="btn" data-book="${esc(s.name)}" type="button">📖 Book${bookMeta[s.name] ? ' ✓' : ''}</button><button class="btn" data-quiz="${esc(s.name)}" type="button">✏️ Quiz me</button></div></div></article>`;
+    }).join('');
+    const chips = state.hideDone && done.length
+      ? `<p class="donechips"><span>🏆 Finished:</span>${done.map(s => `<span class="donechip" style="${sv(s)}">${s.emoji} ${esc(s.name)}</span>`).join('')}</p>` : '';
+    $('subjects').innerHTML = (rows || '<p class="muted" style="margin-top:12px">Every subject is finished. Nice work!</p>') + chips;
+    $('subjCount').textContent = `${done.length} of ${subjects.length} done`;
+  }
+  function renderSetup() {
+    $('hardestpick').value = state.hardest;
+    if (document.activeElement !== $('rewards')) $('rewards').value = state.rewards;
+    $('soundopt').checked = state.sound;
+    $('hidedone').checked = state.hideDone;
+  }
+  function render() {
+    const q = currentQuarter(); state.quarter = q;
+    $('quarter').value = String(q); $('testdate').value = state.date || '';
+    updateBest();
+    renderHeader(); renderHero(); renderToday(); renderWeek(); renderBadges(); renderBean(); renderSubjects(); renderSetup(); renderFocus();
+    saveState();
+  }
+
+  /* ---------- timer ---------- */
+  function startSession(name, mode, round) {
+    unlockAudio();
+    const s = byName(name), m = MODES[mode], r = rangeFor(s), base = lastEffective(s);
+    state.timer = {mode, phase:'work', stage:'running', subject:name, total:m.work * 60000, startedAt:Date.now(), endsAt:Date.now() + m.work * 60000,
+      left:null, round:round || 1, goalA:base + 1, goalB:Math.min(r[1], base + 5), startStudied:studiedCount(s), full:false, mins:0, reward:'', slips:0, hiddenAt:null, sadUntil:0, socks:0};
+    render();
+  }
+  function startBreak() {
+    const t = state.timer, ms = MODES.pomodoro.brk * 60000;
+    state.timer = {...t, phase:'break', stage:'running', total:ms, endsAt:Date.now() + ms, left:null};
+    render();
+  }
+  function finishWork(full) {
+    const t = state.timer; if (!t) return;
+    const left = full ? 0 : t.stage === 'running' ? Math.max(0, t.endsAt - Date.now()) : (t.left || 0);
+    const mins = Math.round((t.total - left) / 60000);
+    act(info => {
+      const d = getToday(); d.m += mins;
+      if (full) {
+        d.s += 1; state.sessions++; if (t.mode === 'pomodoro') state.pomodoros++;
+        state.xp += XP_SESSION; info.big = true; info.lines.push('Round complete');
+        t.socks = Math.max(1, 3 - (t.slips || 0)); state.socks += t.socks; info.lines.push('+' + t.socks + ' 🧦');
+      }
+      if (mins > 0 || full) markEarly(t.startedAt);
+      t.stage = 'done'; t.full = full; t.mins = mins; t.endsAt = null; t.left = null; t.reward = full ? pickReward() : '';
+    }, {undo:false});
+    if (full) beep();
+  }
+  function finishBreak() {
+    const t = state.timer; if (!t) return;
+    t.stage = 'done'; t.endsAt = null; t.left = null;
+    saveState(); renderFocus(); beep();
+  }
+  function pickReward() {
+    const list = state.rewards.split(',').map(x => x.trim()).filter(Boolean);
+    return list.length ? list[Math.random() * list.length | 0] : '';
+  }
+  function closeFocus() {
+    state.timer = null; pickIdx = 0; render();
+    const g = $('goSprint'); if (g) g.focus();
+  }
+  function tick() {
+    const t = state.timer; if (!t || t.stage !== 'running') return;
+    const left = t.endsAt - Date.now();
+    if (left <= 0) { if (t.phase === 'work') finishWork(true); else finishBreak(); }
+    else {
+      paintClock(left);
+      if (t.sadUntil && Date.now() > t.sadUntil) { t.sadUntil = 0; renderFocus(); }
+    }
+  }
+  function paintClock(left) {
+    const t = state.timer, c = $('fsClock'), b = $('fsBar'); if (!t || !c) return;
+    c.textContent = fmt(left); b.style.width = Math.max(0, Math.min(100, left / t.total * 100)) + '%';
+    document.title = fmt(left) + ' ' + (t.phase === 'break' ? 'Break' : t.subject);
+  }
+  function renderFocus() {
+    const f = $('focus'), t = state.timer;
+    if (!t) { f.hidden = true; document.title = BASE_TITLE; syncInert(); return; }
+    const s = byName(t.subject);
+    f.style.cssText = t.phase === 'break' ? '--c:hsl(160 60% 24%);--t:hsl(160 55% 93%)' : sv(s);
+    let html;
+    if (t.stage === 'done') html = t.phase === 'work' ? doneHTML(t, s) : breakDoneHTML(t, s);
+    else html = runHTML(t, s);
+    $('fbody').innerHTML = html;
+    f.hidden = false; syncInert();
+    if (t.stage === 'done') document.title = t.phase === 'work' ? '✅ Round done' : 'Break over';
+    else paintClock(t.stage === 'running' ? Math.max(0, t.endsAt - Date.now()) : t.left);
+    if (!f.contains(document.activeElement)) { const b = f.querySelector('.go') || f.querySelector('button'); if (b) b.focus({preventScroll:true}); }
+  }
+  function runHTML(t, s) {
+    const brk = t.phase === 'break', paused = t.stage === 'paused';
+    const label = brk ? 'Break time' : t.mode === 'pomodoro' ? `Pomodoro, round ${t.round}` : MODES[t.mode].label + (t.mode === 'hardest' ? ' (10-minute warm-up)' : '');
+    const goal = t.goalA === t.goalB ? `page ${t.goalA}` : `pages ${t.goalA} to ${t.goalB}`;
+    return `<div class="f-head"><span>${esc(label)}${paused ? ', paused' : ''}</span><button class="link" data-a="cancel" type="button">Cancel</button></div>
+      <div class="f-subj"><span class="spine">${brk ? '☕' : s.emoji}</span><h2><mark>${brk ? 'Break' : esc(s.name)}</mark></h2></div>
+      ${beanHTML(t)}
+      <div class="f-clock" id="fsClock" role="timer" aria-live="off">00:00</div>
+      <div class="f-track"><i id="fsBar"></i></div>
+      <p class="f-goal">${brk ? 'Stretch, drink some water and look away from the screen.' : `Aim for ${goal}. You can stop when the timer ends.`}</p>
+      <div class="f-btns"><button class="go" data-a="pause" type="button">${paused ? '▶ Resume' : 'Pause'}</button>
+        ${brk ? '<button class="btn" data-a="skipbreak" type="button">Skip break, start next round</button>' : '<button class="btn" data-a="finish" type="button">Finish early</button>'}</div>
+      ${brk ? '' : '<p class="f-phone">📵 Phone in another room? Go and put it there now.</p>'}`;
+  }
+  function doneHTML(t, s) {
+    const r = rangeFor(s), c = countFor(r), st = studiedCount(s), fin = st >= c, now = lastEffective(s);
+    const added = Math.max(0, st - (t.startStudied || 0));
+    const goalN = Math.max(1, t.goalB - t.goalA + 1);
+    const quick = [5, 10, 20].filter(n => n !== goalN);
+    const pomo = t.mode === 'pomodoro';
+    const nextBtns = fin
+      ? '<button class="go" data-a="switch" type="button">Pick the next subject</button>'
+      : pomo
+        ? `<button class="go" data-a="break" type="button">☕ Take a 5-minute break</button><button class="btn" data-a="again" type="button">Skip the break, start round ${t.round + 1}</button>`
+        : `<button class="go" data-a="again" type="button">▶ Keep going: 10 more minutes</button>`;
+    return `<div class="f-head"><span>${t.full ? 'Round complete 🎉' : 'Session ended'}</span><span></span></div>
+      <div class="f-subj"><span class="spine">${s.emoji}</span><h2><mark>${esc(s.name)}</mark></h2></div>
+      <p class="f-goal">${t.mins} minute${t.mins === 1 ? '' : 's'} of focus${t.full ? `, +${XP_SESSION} XP` : ''}.${t.mode === 'hardest' && t.full ? ' Warm-up done on your hardest subject. Keep going, or switch if you want.' : ''}</p>
+      ${t.full ? `<p class="f-socks">🫘 Bean knitted ${t.socks || 0} sock${t.socks === 1 ? '' : 's'} for you! 🧦 ${state.socks} in total${t.slips ? ` (Bean got sad ${t.slips} time${t.slips === 1 ? '' : 's'} when you left the tab)` : ''}.</p>` : '<p class="f-socks">🫘 Bean says: finish the full timer next time to earn socks.</p>'}
+      <div class="f-box">
+        <strong>How many pages did you get through?</strong>
+        <span class="muted small">Now at page ${now} of ${r[1]}. ${st} of ${c} pages studied${added ? `, +${added} this round` : ''}.</span>
+        ${fin ? '<p>🎉 This subject is finished.</p>' : `<div class="f-btns">
+          <button class="go" data-a="add" data-n="${goalN}" type="button">✓ I read my ${goalN} page${goalN === 1 ? '' : 's'}</button>
+          ${quick.map(n => `<button class="btn" data-a="add" data-n="${n}" type="button">+${n}</button>`).join('')}</div>
+        <div class="f-exact"><div class="field"><label for="fsPage">Or type the last page you finished</label><input id="fsPage" type="number" min="0" step="1" max="${r[1]}"></div>
+        <button class="btn" data-a="savepage" type="button">Save</button></div>`}
+      </div>
+      ${t.reward ? `<p class="f-reward">🎁 Reward time: <strong>${esc(t.reward)}</strong></p>` : ''}
+      <div class="f-btns">${nextBtns}
+        <button class="btn" data-a="quiz" type="button">✏️ Quiz me on these pages</button>
+        ${fin ? '' : '<button class="btn" data-a="switch" type="button">Switch subject</button>'}
+        <button class="btn" data-a="close" type="button">I'm done for now</button></div>`;
+  }
+  function breakDoneHTML(t, s) {
+    return `<div class="f-head"><span>Break over ☕</span><span></span></div>
+      <div class="f-subj"><span class="spine">${s.emoji}</span><h2><mark>${esc(s.name)}</mark></h2></div>
+      <p class="f-goal">Ready for round ${t.round + 1}?</p>
+      <div class="f-btns"><button class="go" data-a="nextround" type="button">▶ Start round ${t.round + 1}</button>
+        <button class="btn" data-a="switch" type="button">Switch subject</button>
+        <button class="btn" data-a="close" type="button">Done for today</button></div>`;
+  }
+  $('fbody').addEventListener('click', e => {
+    const b = e.target.closest('[data-a]'), t = state.timer; if (!b || !t) return;
+    const a = b.dataset.a, nextMode = t.mode === 'pomodoro' ? 'pomodoro' : 'sprint', nextRound = t.mode === 'pomodoro' ? t.round + 1 : 1;
+    if (a === 'pause') {
+      if (t.stage === 'running') { t.left = Math.max(0, t.endsAt - Date.now()); t.endsAt = null; t.stage = 'paused'; }
+      else if (t.stage === 'paused') { t.endsAt = Date.now() + t.left; t.left = null; t.stage = 'running'; unlockAudio(); }
+      saveState(); renderFocus();
+    }
+    else if (a === 'finish') finishWork(false);
+    else if (a === 'cancel') { const used = t.total - (t.stage === 'running' ? t.endsAt - Date.now() : t.left || 0); if (used < 60000 || confirm('Stop this timer? Time already studied will not be logged.')) closeFocus(); }
+    else if (a === 'add') quickAdd(t.subject, Number(b.dataset.n));
+    else if (a === 'savepage') {
+      const s = byName(t.subject), r = rangeFor(s), raw = $('fsPage').value, n = Number(raw);
+      if (raw.trim() === '' || !Number.isInteger(n) || n < 0 || n > r[1]) { toast(`Enter a whole page number from 0 to ${r[1]}.`); return; }
+      act(info => { setLast(t.subject, n, info); });
+    }
+    else if (a === 'again') startSession(t.subject, nextMode, nextRound);
+    else if (a === 'break') startBreak();
+    else if (a === 'skipbreak' || a === 'nextround') startSession(t.subject, 'pomodoro', t.round + 1);
+    else if (a === 'switch') pickSubject('Switch to which subject?', name => startSession(name, nextMode, nextRound));
+    else if (a === 'close') closeFocus();
+    else if (a === 'quiz') {
+      const s = byName(t.subject), now = lastEffective(s), from = rangeFor(s)[0] + (t.startStudied || 0);
+      if (now >= from) startQuiz(t.subject, from, now); else startQuiz(t.subject, t.goalA, t.goalB);
+    }
+  });
+  $('fbody').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.target.id === 'fsPage') { e.preventDefault(); const b = $('fbody').querySelector('[data-a="savepage"]'); if (b) b.click(); }
+  });
+  setInterval(tick, 250);
+
+  /* ---------- Bean, the focus friend ---------- */
+  const DECOR = [
+    {id:'plant', n:'Plant', c:3, x:640, h:76}, {id:'candle', n:'Candle', c:4, x:780, h:72},
+    {id:'chair', n:'Armchair', c:6, x:920, h:62}, {id:'frame', n:'Picture', c:8, x:1070, h:90},
+    {id:'rug', n:'Yarn basket', c:10, x:1215, h:56}, {id:'books', n:'Bookshelf', c:12, x:1375, h:98}
+  ];
+  const INK = 'stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"';
+  const bk = (x, y, h, c) => `<rect x="${x}" y="${y}" width="8" height="${h}" fill="${c}" ${INK.replace('2.5','1.5')}/>`;
+  const ART = {
+    plant: `<g class="wsway" style="transform-origin:0 -28px;animation-duration:3.4s"><path d="M0 -28 C-18 -36 -22 -54 -10 -64 C-4 -52 -2 -40 0 -28Z" fill="#4fb36b" ${INK}/><path d="M0 -28 C16 -40 24 -56 14 -68 C6 -56 2 -42 0 -28Z" fill="#3a9c58" ${INK}/><path d="M0 -28 C-3 -44 4 -60 0 -74 C-8 -58 -6 -42 0 -28Z" fill="#66c57f" ${INK}/></g><path d="M-16 -28 H16 L11 0 H-11Z" fill="#d9774a" ${INK}/><rect x="-19" y="-33" width="38" height="8" rx="3" fill="#e98c5b" ${INK}/>`,
+    candle: `<circle class="glow" cx="0" cy="-54" r="24" fill="#ffd93d" opacity=".3"/><ellipse cx="0" cy="-3" rx="17" ry="5" fill="#c9a86a" ${INK}/><rect x="-8" y="-42" width="16" height="40" rx="3" fill="#fff4d6" ${INK}/><path d="M0 -42 v-4" stroke="var(--ink)" stroke-width="2"/><path class="flame" d="M0 -68 C-8 -58 -6 -48 0 -46 C6 -48 8 -58 0 -68Z" fill="#ff9a1a" ${INK.replace('2.5','2')}/>`,
+    chair: `<rect x="-30" y="-60" width="60" height="40" rx="15" fill="#6c7ae0" ${INK}/><rect x="-39" y="-40" width="16" height="32" rx="8" fill="#5866cf" ${INK}/><rect x="23" y="-40" width="16" height="32" rx="8" fill="#5866cf" ${INK}/><rect x="-29" y="-28" width="58" height="19" rx="7" fill="#7f8cf0" ${INK}/><rect x="-28" y="-10" width="6" height="10" fill="var(--ink)"/><rect x="22" y="-10" width="6" height="10" fill="var(--ink)"/>`,
+    frame: `<path d="M-24 0 L0 -88 M24 0 L0 -88" stroke="#8a5a2b" stroke-width="5" stroke-linecap="round"/><rect x="-28" y="-84" width="56" height="44" rx="3" fill="#fff" ${INK}/><rect x="-23" y="-79" width="46" height="34" fill="#bfe6ff"/><path d="M-23 -45 L-9 -64 L2 -53 L11 -66 L23 -45Z" fill="#56ad4c"/><circle cx="13" cy="-69" r="4.5" fill="#ffd93d"/>`,
+    rug: `<path d="M-30 -30 H30 L24 0 H-24Z" fill="#d9a86a" ${INK}/><path d="M-27 -20 H27 M-25 -10 H25" stroke="#a9763a" stroke-width="2"/><g class="wob" style="transform-origin:-10px -28px"><circle cx="-10" cy="-40" r="14" fill="#ff7a1a" ${INK}/><path d="M-21 -45 Q-10 -36 1 -45 M-21 -38 Q-10 -29 1 -38" stroke="#fff" stroke-opacity=".6" fill="none" stroke-width="2"/></g><circle cx="15" cy="-38" r="11" fill="#2b4bd6" ${INK}/>`,
+    books: `<rect x="-34" y="-98" width="68" height="98" rx="4" fill="#b8793e" ${INK}/><rect x="-28" y="-92" width="56" height="26" fill="#8d5a2b"/><rect x="-28" y="-60" width="56" height="26" fill="#8d5a2b"/><rect x="-28" y="-28" width="56" height="24" fill="#8d5a2b"/>${bk(-25,-90,22,'#e5484d')}${bk(-15,-88,20,'#ffd93d')}${bk(-5,-90,22,'#2b4bd6')}${bk(5,-86,18,'#0f7a5a')}${bk(15,-90,22,'#ff7a1a')}${bk(-25,-58,22,'#6c7ae0')}${bk(-15,-56,20,'#e5484d')}${bk(-5,-58,22,'#fff4d6')}${bk(10,-58,22,'#0f7a5a')}${bk(-25,-26,20,'#ffd93d')}${bk(-14,-24,18,'#2b4bd6')}${bk(0,-26,20,'#e5484d')}`
+  };
+  /* one character, drawn once, used on the timer screen and in the world */
+  function figure(m, pose, knitting) {
+    return `<g class="bf m-${m} p-${pose}${knitting ? ' knitting' : ''}" data-bean="1">
+      <ellipse class="bf-sh" cx="0" cy="2" rx="28" ry="5" fill="rgba(0,0,0,.18)"/>
+      <g class="bf-all">
+        <g class="bf-fl"><ellipse cx="-13" cy="-5" rx="10" ry="6" fill="#c98a50" ${INK}/></g>
+        <g class="bf-fr"><ellipse cx="13" cy="-5" rx="10" ry="6" fill="#c98a50" ${INK}/></g>
+        <g class="bf-body"><path d="M-31 -40 C-35 -80 -8 -94 8 -90 C32 -86 38 -60 32 -38 C28 -16 12 -8 -3 -8 C-21 -8 -29 -22 -31 -40Z" fill="#eaae70" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M-23 -62 C-22 -76 -11 -84 0 -85" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="4" stroke-linecap="round"/>
+          <ellipse cx="-16" cy="-42" rx="6" ry="4" fill="#f08a7a" opacity=".65"/><ellipse cx="26" cy="-42" rx="6" ry="4" fill="#f08a7a" opacity=".65"/>
+          <g class="e-h bf-eyes"><ellipse cx="-7" cy="-58" rx="4" ry="5" fill="var(--ink)"/><ellipse cx="15" cy="-58" rx="4" ry="5" fill="var(--ink)"/><circle cx="-5.8" cy="-60" r="1.4" fill="#fff"/><circle cx="16.2" cy="-60" r="1.4" fill="#fff"/></g>
+          <g class="e-s bf-eyes"><ellipse cx="-7" cy="-56" rx="4" ry="5" fill="var(--ink)"/><ellipse cx="15" cy="-56" rx="4" ry="5" fill="var(--ink)"/><path d="M-14 -66 L-2 -62 M22 -66 L10 -62" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round"/><path d="M-10 -48 q-4 7 0 9 q4 -2 0 -9z" fill="#6ab7ff"/></g>
+          <path class="e-z" d="M-13 -57 q6 5 12 0 M9 -57 q6 5 12 0" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round"/>
+          <path class="mo-h" d="M-2 -46 Q4 -39 10 -46" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round"/>
+          <path class="mo-s" d="M-2 -40 Q4 -47 10 -40" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round"/>
+          <ellipse class="mo-z" cx="4" cy="-43" rx="3" ry="2.5" fill="var(--ink)"/>
+          <g class="hat"><path d="M-25 -76 C-24 -106 29 -108 31 -78 Q3 -86 -25 -76Z" fill="#e5484d" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/><path d="M-24 -80 Q3 -89 30 -81" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-opacity=".85"/><circle class="pom" cx="3" cy="-106" r="6" fill="#fff" stroke="var(--ink)" stroke-width="2.5"/></g>
+        </g>
+        <g class="pa"><ellipse class="bf-al" cx="-34" cy="-38" rx="6.5" ry="10" fill="#eaae70" ${INK}/><ellipse class="bf-ar" cx="36" cy="-38" rx="6.5" ry="10" fill="#eaae70" ${INK}/></g>
+        <g class="pk"><g class="sock"><path d="M-8 -26 h16 v22 q0 6 -8 6 t-8 -6z" fill="#ff7a1a" ${INK.replace('2.5','2')}/><path d="M-8 -20 h16 M-8 -13 h16" stroke="#fff" stroke-width="2"/></g>
+          <line class="nl" x1="-24" y1="-26" x2="4" y2="-6" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/><line class="nr" x1="28" y1="-26" x2="0" y2="-6" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="-24" cy="-26" r="6" fill="#eaae70" ${INK}/><circle cx="28" cy="-26" r="6" fill="#eaae70" ${INK}/></g>
+        <g class="pt"><path d="M18 -34 h22 v12 q0 9 -11 9 q-11 0 -11 -9z" fill="#fff" ${INK}/><path d="M40 -32 q9 0 9 6 q0 6 -9 6" fill="none" stroke="var(--ink)" stroke-width="2.5"/><path d="M26 -40 q-4 -5 0 -9 M34 -40 q-4 -5 0 -9" class="st" fill="none" stroke="#8a93ad" stroke-width="2.5" stroke-linecap="round"/><circle cx="-34" cy="-34" r="6.5" fill="#eaae70" ${INK}/><circle cx="20" cy="-30" r="6" fill="#eaae70" ${INK}/></g>
+        <text class="zz" x="30" y="-82">z</text>
+      </g></g>`;
+  }
+  function beanSVG(mood) {
+    const m = mood === 'sad' ? 'sad' : mood === 'sleep' ? 'sleep' : 'happy';
+    return `<svg class="bean ${mood}" viewBox="-62 -118 130 132" aria-hidden="true">${figure(m, mood === 'tea' ? 'tea' : 'knit', mood === 'knit')}</svg>`;
+  }
+  function beanHTML(t) {
+    const mood = t.phase === 'break' ? 'tea' : t.stage === 'paused' ? 'sleep' : (t.sadUntil && t.sadUntil > Date.now()) ? 'sad' : 'knit';
+    const cap = {tea:'Bean is having a cup of tea.', sleep:'Bean is napping while you pause.', sad:'Bean saw you leave and got sad. 🥺', knit:'Bean is knitting you a sock. Stay with it!'}[mood];
+    const slip = t.phase === 'work' && t.slips ? `<small>Left the tab ${t.slips} time${t.slips === 1 ? '' : 's'}: fewer socks this round</small>` : '';
+    return `<div class="bean-wrap">${beanSVG(mood)}<div class="bean-cap">${cap}${slip}</div></div>`;
+  }
+
+  /* ---------- the world ---------- */
+  const tree = (x, s, d) => `<g class="wsway" style="transform-origin:${x}px 240px;animation-delay:${d}s"><rect x="${x - 6 * s}" y="${240 - 46 * s}" width="${12 * s}" height="${46 * s}" fill="#8a5a2b" ${INK}/><circle cx="${x}" cy="${240 - 70 * s}" r="${30 * s}" fill="#4fb36b" ${INK}/><circle cx="${x - 24 * s}" cy="${240 - 52 * s}" r="${21 * s}" fill="#5cc277" ${INK}/><circle cx="${x + 24 * s}" cy="${240 - 52 * s}" r="${21 * s}" fill="#3a9c58" ${INK}/></g>`;
+  const flower = (x, c, d) => `<g class="wsway" style="transform-origin:${x}px 250px;animation-delay:${d}s;animation-duration:3s"><path d="M${x} 250 v-24" stroke="#2f8a47" stroke-width="3" stroke-linecap="round"/><circle cx="${x}" cy="224" r="6" fill="${c}" ${INK.replace('2.5','1.8')}/><circle cx="${x}" cy="224" r="2.2" fill="#ffd93d"/></g>`;
+  const cloudG = (x, y, d, s) => `<g class="cloud" style="--d:${d}s;animation-delay:-${s}s"><g transform="translate(${x} ${y})" fill="#fff" stroke="#cfe3f5" stroke-width="2"><ellipse cx="0" cy="0" rx="40" ry="16"/><circle cx="-14" cy="-12" r="16"/><circle cx="12" cy="-16" r="20"/></g></g>`;
+  const bfly = (c1, c2, s) => `<g class="bfly" style="animation-delay:-${s}s"><g><path class="wl" d="M0 0 C-14 -14 -16 -2 -10 4 C-14 10 -6 12 0 4Z" fill="${c1}" stroke="var(--ink)" stroke-width="1.3"/><path class="wr" d="M0 0 C14 -14 16 -2 10 4 C14 10 6 12 0 4Z" fill="${c2}" stroke="var(--ink)" stroke-width="1.3"/><path d="M0 -4 V8" stroke="var(--ink)" stroke-width="2" stroke-linecap="round"/></g></g>`;
+  const bird = (d, s, y) => `<g class="bird" style="--d:${d}s;animation-delay:-${s}s"><g transform="translate(0 ${y})"><path class="bw" d="M0 0 Q-9 -9 -18 -3 Q-9 -3 0 2Z" fill="var(--ink)"/><path class="bw bw2" d="M0 0 Q9 -9 18 -3 Q9 -3 0 2Z" fill="var(--ink)"/></g></g>`;
+  function buildWorld() {
+    let sd = 11; const R = () => (sd = sd * 16807 % 2147483647) / 2147483647;
+    const bush = x => `<g class="wsway" style="transform-origin:${x}px 250px;animation-duration:6s"><circle cx="${x}" cy="236" r="16" fill="#3fa65a" ${INK}/><circle cx="${x - 16}" cy="242" r="12" fill="#4fb36b" ${INK}/><circle cx="${x + 16}" cy="242" r="12" fill="#378f4d" ${INK}/><circle cx="${x - 5}" cy="234" r="2.6" fill="#e5484d"/><circle cx="${x + 8}" cy="240" r="2.6" fill="#e5484d"/><circle cx="${x - 18}" cy="241" r="2.6" fill="#e5484d"/></g>`;
+    const stars = [...Array(38)].map(() => `<circle class="star" cx="${R() * 1500 | 0}" cy="${8 + R() * 120 | 0}" r="${(1 + R() * 1.4).toFixed(1)}" fill="#fff" style="animation-delay:-${(R() * 3).toFixed(1)}s"/>`).join('');
+    const flies = [...Array(12)].map(() => `<g transform="translate(${R() * 1500 | 0} ${170 + R() * 80 | 0})"><g style="animation:ffloat ${(7 + R() * 6).toFixed(1)}s ease-in-out infinite alternate;animation-delay:-${(R() * 6).toFixed(1)}s"><circle r="7" fill="#ffe86a" opacity=".28"/><circle class="star" r="2.2" fill="#fff8a0"/></g></g>`).join('');
+    const rain = [...Array(30)].map(() => `<line x1="${R() * 1650 | 0}" y1="0" x2="${(R() * 0 + 0) | 0}" y2="0" stroke="#cfe6ff" stroke-width="1.6" stroke-linecap="round" style="animation-delay:-${(R() * .8).toFixed(2)}s"/>`).join('').replace(/x1="(\d+)" y1="0" x2="\d+" y2="0"/g, (m, x) => `x1="${x}" y1="0" x2="${x - 4}" y2="14"`);
+    const seeds = [...Array(8)].map(() => `<g transform="translate(${R() * 900 | 0} ${150 + R() * 80 | 0})"><g class="seed" style="animation-duration:${(13 + R() * 8).toFixed(1)}s;animation-delay:-${(R() * 14).toFixed(1)}s"><circle r="2" fill="#fff" opacity=".85"/><path d="M0 0 l-5 -5 M0 0 l-5 1" stroke="#fff" stroke-width="1.2" opacity=".7"/></g></g>`).join('');
+    const rbw = ['#e5484d', '#ff7a1a', '#ffd93d', '#4fb36b', '#4aa8ff', '#5b4bd6', '#a24bd6'].map((c, i) => `<path d="M${700 + i * 7} 262 A${160 - i * 7} ${160 - i * 7} 0 0 1 ${1020 - i * 7} 262" fill="none" stroke="${c}" stroke-width="7"/>`).join('');
+    const mtn = `<path d="M300 192 L470 82 L522 122 L600 60 L760 192Z" fill="#a9c1e6"/><path d="M600 60 L575 85 L592 79 L602 92 L614 79 L630 87Z" fill="#fff"/><path d="M900 192 L1060 102 L1120 136 L1210 76 L1390 192Z" fill="#9db6df"/><path d="M1210 76 L1186 100 L1202 94 L1212 106 L1224 94 L1240 101Z" fill="#fff"/>
+      <path d="M848 192 L853 132 H867 L872 192Z" fill="#f1e4c6" stroke="var(--ink)" stroke-width="2"/><path d="M846 132 L860 118 L874 132Z" fill="#e5484d" stroke="var(--ink)" stroke-width="2"/><g class="blades" style="transform-origin:860px 130px"><path d="M860 130 V94 M860 130 H896 M860 130 V166 M860 130 H824" stroke="var(--ink)" stroke-width="9" stroke-linecap="round"/><path d="M860 130 V94 M860 130 H896 M860 130 V166 M860 130 H824" stroke="#fff8e6" stroke-width="5" stroke-linecap="round"/></g><circle cx="860" cy="130" r="4" fill="var(--ink)"/>`;
+    const scenery = `${bush(480)}${bush(1135)}${bush(1560)}
+      <g><ellipse cx="300" cy="251" rx="58" ry="11" fill="#6ec6ff" ${INK}/><ellipse cx="286" cy="248" rx="22" ry="3" fill="#fff" opacity=".45"/><ellipse class="rip" cx="318" cy="253" rx="10" ry="2.5" fill="none" stroke="#fff" stroke-width="1.5"/><ellipse class="rip" cx="268" cy="252" rx="10" ry="2.5" fill="none" stroke="#fff" stroke-width="1.5" style="animation-delay:-1.6s"/>
+        <ellipse cx="280" cy="252" rx="10" ry="3" fill="#3fa65a" ${INK.replace('2.5','1.5')}/><ellipse cx="322" cy="250" rx="9" ry="2.8" fill="#3fa65a" ${INK.replace('2.5','1.5')}/>
+        <g transform="translate(280 250)"><g class="frog"><ellipse cx="0" cy="-5" rx="7" ry="5" fill="#59c26b" ${INK.replace('2.5','1.8')}/><circle cx="-3" cy="-10" r="2.6" fill="#fff" ${INK.replace('2.5','1.4')}/><circle cx="3" cy="-10" r="2.6" fill="#fff" ${INK.replace('2.5','1.4')}/><circle cx="-3" cy="-10" r="1" fill="var(--ink)"/><circle cx="3" cy="-10" r="1" fill="var(--ink)"/></g></g></g>
+      <g><rect x="407" y="176" width="6" height="76" fill="#3b4a6b" ${INK}/><rect x="402" y="156" width="16" height="20" rx="3" fill="#fff3b0" ${INK}/><path d="M397 157 L410 143 L423 157Z" fill="#3b4a6b" ${INK}/></g>
+      <rect x="1438" y="186" width="50" height="6" rx="3" fill="#8a5a2b" ${INK}/><g class="swing" style="transform-origin:1462px 190px"><path d="M1448 190 V228 M1476 190 V228" stroke="#8a5a2b" stroke-width="2.5"/><rect x="1440" y="226" width="42" height="7" rx="3" fill="#d9a86a" ${INK}/></g>`;
+    const critters = `<g class="cat" data-cat="1" transform="translate(205 258)"><rect x="-34" y="-40" width="82" height="44" fill="transparent"/><g class="breath"><ellipse cx="0" cy="-12" rx="24" ry="13" fill="#f3a65a" ${INK}/><path d="M-8 -24 q2 6 0 10 M2 -25 q2 6 0 11 M12 -23 q2 6 0 10" stroke="#c97a2e" stroke-width="2.2" fill="none" stroke-linecap="round"/></g><path class="tail" d="M22 -8 Q42 -10 40 -28" fill="none" stroke="#f3a65a" stroke-width="7" stroke-linecap="round"/><circle cx="-22" cy="-14" r="10" fill="#f3a65a" ${INK}/><path d="M-30 -21 L-28 -33 L-21 -24Z M-17 -24 L-13 -33 L-12 -21Z" fill="#f3a65a" ${INK.replace('2.5','2')}/><path d="M-28 -14 q3 3 6 0" stroke="var(--ink)" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="-30" cy="-11" r="1.6" fill="#e58a8a"/><text x="-8" y="-38">z</text></g>
+      <g class="snail"><g transform="translate(0 284)"><path d="M-12 0 Q4 -4 16 -2 Q20 -8 18 -10 Q22 -4 18 0Z" fill="#d9c7a0" ${INK.replace('2.5','1.6')}/><g class="stalk"><path d="M16 -5 L19 -14" stroke="var(--ink)" stroke-width="1.6" stroke-linecap="round"/></g><circle cx="-2" cy="-8" r="8" fill="#e5a15b" ${INK.replace('2.5','1.8')}/><path d="M-2 -8 m-4 0 a4 4 0 1 1 4 4" fill="none" stroke="#a9632b" stroke-width="1.6"/></g></g>
+      <g class="bun"><g transform="translate(0 272)"><g class="bh"><ellipse cx="-12" cy="-8" rx="5" ry="5" fill="#fff" ${INK.replace('2.5','1.6')}/><ellipse cx="0" cy="-10" rx="13" ry="9" fill="#f4efe8" ${INK.replace('2.5','1.8')}/><circle cx="14" cy="-17" r="7" fill="#f4efe8" ${INK.replace('2.5','1.8')}/><ellipse cx="11" cy="-31" rx="3" ry="10" fill="#f4efe8" ${INK.replace('2.5','1.6')} transform="rotate(-8 11 -31)"/><ellipse cx="17" cy="-30" rx="3" ry="10" fill="#f4efe8" ${INK.replace('2.5','1.6')} transform="rotate(14 17 -30)"/><circle cx="17" cy="-18" r="1.4" fill="var(--ink)"/><circle cx="21" cy="-15" r="1.4" fill="#f08a9a"/></g></g></g>`;
+    const night = `<rect class="night" width="1600" height="300" fill="#0d1b4a"/><g class="lights"><circle cx="410" cy="166" r="52" fill="#ffd93d" opacity=".32"/><path d="M402 176 L376 252 H444 L418 176Z" fill="#ffd93d" opacity=".14"/><rect x="52" y="206" width="30" height="26" rx="3" fill="#ffd266" opacity=".95"/><path d="M67 206 v26 M52 219 h30" stroke="var(--ink)" stroke-width="2"/></g>`;
+    let tufts = '';
+    for (let x = 6; x < 1600; x += 34) tufts += `<path d="M${x} 300 q-2 -20 -9 -28 q8 6 11 14 q1 -12 7 -22 q-2 14 0 36z" fill="${x % 68 ? '#4fa844' : '#5cbb50'}"/>`;
+    $('beanHome').innerHTML = `<svg class="w-svg" viewBox="0 0 1600 300" role="img" aria-label="Bean’s world, scroll sideways">
+      <defs><linearGradient id="wsk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7cc8ff"/><stop offset=".7" stop-color="#d6f0ff"/><stop offset="1" stop-color="#f1fbe6"/></linearGradient>
+        <linearGradient id="wgr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7ccf6a"/><stop offset="1" stop-color="#4f9f45"/></linearGradient></defs>
+      <rect width="1600" height="300" fill="url(#wsk)"/><rect class="tint" width="1600" height="300" fill="#ff9a5b"/>
+      <g class="w-sky"><g class="stars">${stars}</g><g class="moonb"><circle cx="190" cy="76" r="23" fill="#fff6d8" stroke="#e8dcae" stroke-width="2"/><circle cx="181" cy="69" r="4" fill="#ecdfb4"/><circle cx="199" cy="84" r="3" fill="#ecdfb4"/><circle cx="203" cy="66" r="2.4" fill="#ecdfb4"/></g><g class="sunb"><circle class="halo" cx="110" cy="66" r="62" fill="#fff6b0" opacity=".45"/><g class="rays" stroke="#ffd93d" stroke-width="5" stroke-linecap="round">${[...Array(12)].map((_, i) => `<line x1="110" y1="${66 - 44}" x2="110" y2="${66 - 56}" transform="rotate(${i * 30} 110 66)"/>`).join('')}</g><circle cx="110" cy="66" r="30" fill="#ffd93d" stroke="#ffb300" stroke-width="3"/></g>
+        ${cloudG(0, 60, 110, 20)}${cloudG(0, 110, 150, 90)}${cloudG(0, 40, 130, 60)}${cloudG(0, 90, 170, 140)}</g>
+      <g class="rb">${rbw}</g><g class="w-far">${mtn}<path d="M0 190 Q130 120 260 190 T520 190 T780 190 T1040 190 T1300 190 T1560 190 T1620 190 V300 H0Z" fill="#b7e2a6"/></g>
+      <g class="w-mid"><path d="M0 214 Q100 168 200 214 T400 214 T600 214 T800 214 T1000 214 T1200 214 T1400 214 T1600 214 V300 H0Z" fill="#94d184"/></g>
+      ${bird(40, 8, 40)}${bird(55, 30, 80)}
+      <path d="M0 240 Q200 232 400 240 T800 240 T1200 240 T1600 240 V300 H0Z" fill="url(#wgr)" stroke="var(--ink)" stroke-width="3"/>
+      <path d="M0 262 Q400 254 800 262 T1600 262" stroke="#ecd9a0" stroke-width="16" fill="none" stroke-linecap="round" opacity=".85"/>
+      ${tree(520, 1, 0)}${tree(1470, 1.15, 1.4)}${tree(1540, .85, .6)}${flower(590, '#ff6b9a', .3)}${flower(612, '#fff', 1.1)}${flower(1160, '#c77dff', .7)}${flower(1180, '#ff6b9a', 1.6)}${flower(300, '#fff', .4)}${flower(330, '#ffd93d', 1.2)}
+      ${scenery}
+      <g class="house"><circle class="sm" cx="132" cy="150" r="9" fill="#fff" style="animation-delay:0s"/><circle class="sm" cx="132" cy="150" r="9" fill="#fff" style="animation-delay:1.5s"/><circle class="sm" cx="132" cy="150" r="9" fill="#fff" style="animation-delay:3s"/>
+        <rect x="120" y="158" width="18" height="34" fill="#c46b4b" ${INK}/><rect x="36" y="188" width="128" height="62" rx="4" fill="#f6d9a8" ${INK}/><path d="M26 192 L100 138 L174 192Z" fill="#d9534f" ${INK}/>
+        <rect x="52" y="206" width="30" height="26" rx="3" fill="#ffe27a" ${INK}/><rect class="win" x="52" y="206" width="30" height="26" rx="3" fill="#fff6b0"/><path d="M67 206 v26 M52 219 h30" stroke="var(--ink)" stroke-width="2"/>
+        <path d="M110 250 v-34 q0 -12 14 -12 t14 12 v34z" fill="#8a5a2b" ${INK}/><circle cx="132" cy="230" r="2.5" fill="#ffd93d"/></g>
+      ${bfly('#ff9ad5', '#ffb3e1', 0)}${bfly('#7cc8ff', '#a8dcff', 11)}${critters}${night}
+      ${DECOR.map(d => `<g class="spot ${d.id} locked" transform="translate(${d.x} 258)" data-buy="${d.id}" tabindex="0" role="button"><rect x="-38" y="${-d.h - 8}" width="76" height="${d.h + 14}" fill="transparent"/><g class="art">${ART[d.id]}</g><g class="tag" transform="translate(0 ${-d.h - 16})"><rect x="-30" y="-13" width="60" height="24" rx="12" fill="#fff" ${INK.replace('2.5','2')}/><text text-anchor="middle" y="4" font-size="13" font-weight="800" fill="var(--ink)">🧦 ${d.c}</text></g></g>`).join('')}
+      <g id="wBean" transform="translate(260 258)">${figure('happy', 'arms', false).replace('data-bean="1"', 'data-bean="1" role="button" tabindex="0" aria-label="Bean. Tap to say hi."')}</g>
+      <g id="wFx"></g>
+      <g class="say" id="wSay"><rect id="wSayR" x="-60" y="-24" width="120" height="30" rx="14" fill="#fff" ${INK.replace('2.5','2')}/><text id="wSayT" text-anchor="middle" y="-4" font-size="13" font-weight="800" fill="var(--ink)"></text></g>
+      <g class="tufts">${tufts}</g>
+      <g class="flies">${flies}</g>${seeds}<g class="rainc"><rect width="1600" height="300" fill="#5b6b8c" opacity=".2"/>${rain}</g>
+      <g class="hint"><rect x="14" y="120" width="132" height="26" rx="13" fill="#fff" ${INK.replace('2.5','2')}/><text x="80" y="138" text-anchor="middle" font-size="13" font-weight="800" fill="var(--ink)">Swipe sideways →</text></g>
+    </svg>`;
+    const h = $('beanHome'), far = h.querySelector('.w-far'), mid = h.querySelector('.w-mid'), sky = h.querySelector('.w-sky');
+    h.addEventListener('scroll', () => {
+      const x = h.scrollLeft; far.style.transform = `translateX(${x * .55}px)`; mid.style.transform = `translateX(${x * .3}px)`; sky.style.transform = `translateX(${x * .8}px)`;
+    }, {passive:true});
+    if ('IntersectionObserver' in window) new IntersectionObserver(es => { wvis = es[0].isIntersecting; wKick(); }, {threshold:.05}).observe(h); else { wvis = true; wKick(); }
+  }
+  /* bean's brain: walks to a spot, knits or rests, then goes somewhere else */
+  let wpuff = 0, wx = 260, wv = 0, wface = 1, wdir = 1, wphase = 0, wstate = 'idle', wuntil = 0, wtarget = 260, wlast = 0, wraf = 0, wvis = false, wcls = '';
+  const reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function wPick() {
+    const spots = [320, 460, 560].concat(DECOR.filter(d => state.decor[d.id]).map(d => d.x - 60));
+    let t, n = 0; do { t = spots[Math.random() * spots.length | 0]; } while (Math.abs(t - wx) < 40 && ++n < 12);
+    wtarget = t; wstate = 'walk';
+  }
+  function wDraw(t) {
+    const g = $('wBean'); if (!g) return;
+    const walking = wstate === 'walk' && Math.abs(wv) > 6, s = Math.sin(wphase), c = Math.cos(wphase);
+    const hop = walking ? Math.abs(s) * 4.5 : wstate === 'cheer' ? Math.abs(Math.sin(t * 9)) * 16 : 0;
+    const sq = walking ? .035 * Math.cos(wphase * 2) : Math.sin(t * 2.2) * .012;
+    const knit = wstate === 'knit', sit = knit ? 5 : 0;
+    const cls = `bf m-happy p-${knit ? 'knit' : 'arms'}${knit ? ' knitting' : ''}`, f = g.firstElementChild;
+    if (cls !== wcls) { wcls = cls; f.setAttribute('class', cls); }
+    g.setAttribute('transform', `translate(${wx.toFixed(1)} 258)`);
+    f.querySelector('.bf-all').setAttribute('transform', `translate(0 ${(sit - hop).toFixed(1)}) scale(${(wface * (1 + sq)).toFixed(3)} ${(1 - sq - sit * .006).toFixed(3)})`);
+    f.querySelector('.bf-sh').setAttribute('rx', (28 - hop * .9).toFixed(1));
+    f.querySelector('.bf-fl').setAttribute('transform', `translate(${walking ? s * 10 : 0} ${walking ? -Math.max(0, c) * 6 : 0})`);
+    f.querySelector('.bf-fr').setAttribute('transform', `translate(${walking ? -s * 10 : 0} ${walking ? -Math.max(0, -c) * 6 : 0})`);
+    const wave = wstate === 'wave', cheer = wstate === 'cheer';
+    f.querySelector('.bf-al').setAttribute('transform', `rotate(${cheer ? 150 : walking ? s * 26 : 0} -34 -46)`);
+    f.querySelector('.bf-ar').setAttribute('transform', `rotate(${wave ? -140 + Math.sin(t * 13) * 20 : cheer ? -150 : walking ? -s * 26 : 0} 36 -46)`);
+    $('wSay').setAttribute('transform', `translate(${wx.toFixed(1)} 150)`);
+  }
+  function wFrame(now) {
+    wraf = 0; if (!wvis || document.hidden) return;
+    const dt = Math.min(.05, (now - (wlast || now)) / 1000); wlast = now;
+    if (wstate === 'walk') {
+      const d = wtarget - wx; wdir = d >= 0 ? 1 : -1;
+      const sp = 58 * Math.max(.2, Math.min(1, Math.abs(d) / 45));
+      wv += (wdir * sp - wv) * Math.min(1, dt * 5); wx += wv * dt;
+      if (Math.abs(d) < 3 && Math.abs(wv) < 8) { wv = 0; wstate = Math.random() < .65 ? 'knit' : 'idle'; wuntil = now + 3500 + Math.random() * 3500; }
+    } else {
+      wv += (0 - wv) * Math.min(1, dt * 8);
+      if (now > wuntil) { if (wstate === 'wave' || wstate === 'cheer') { wstate = 'idle'; wuntil = now + 1200; } else wPick(); }
+    }
+    wface += (wdir - wface) * Math.min(1, dt * 9);
+    wphase += Math.abs(wv) * dt * .12;
+    if (wstate === 'walk' && Math.abs(wv) > 20 && wphase - wpuff > 1.7) { wpuff = wphase; puff(); }
+    wDraw(now / 1000);
+    wraf = requestAnimationFrame(wFrame);
+  }
+  function wKick() {
+    if (reduceMotion) { wDraw(0); return; }
+    if (wvis && !document.hidden && !wraf) { wlast = 0; wraf = requestAnimationFrame(wFrame); }
+  }
+  document.addEventListener('visibilitychange', wKick);
+  let sayTimer;
+  const SAYS = ['Knit one, purl one! 🧶', 'Study hard, nap soft. 💤', 'I’m proud of you! 🫘', 'Got any socks to spare? 🧦', 'Let’s focus together!'];
+  function beanSay(msg) {
+    const el = $('wSay'); if (!el) return;
+    $('wSayT').textContent = msg; const w = Math.max(70, msg.length * 7.6 + 24);
+    $('wSayR').setAttribute('x', -w / 2); $('wSayR').setAttribute('width', w);
+    el.classList.add('on'); clearTimeout(sayTimer); sayTimer = setTimeout(() => el.classList.remove('on'), 2600);
+  }
+  function puff() {
+    const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    c.setAttribute('class', 'puff'); c.setAttribute('cx', (wx - wdir * 16).toFixed(1)); c.setAttribute('cy', '254'); c.setAttribute('r', '5'); c.setAttribute('fill', '#e9ddb8');
+    $('wFx').append(c); setTimeout(() => c.remove(), 750);
+  }
+  function burst(emo, bx, by) {
+    emo = emo || '✨'; bx = bx == null ? wx : bx; by = by == null ? 190 : by;
+    const NS = 'http://www.w3.org/2000/svg', g = document.createElementNS(NS, 'g');
+    g.setAttribute('class', 'burst'); g.setAttribute('transform', `translate(${bx} ${by})`);
+    for (let i = 0; i < 7; i++) {
+      const t = document.createElementNS(NS, 'text'), a = i / 7 * Math.PI * 2;
+      t.textContent = emo; t.setAttribute('style', `--dx:${Math.cos(a) * 54}px;--dy:${Math.sin(a) * 40 - 10}px`); g.append(t);
+    }
+    $('wBean').after(g); setTimeout(() => g.remove(), 1000);
+  }
+  function renderBean() {
+    if (!$('beanHome').firstChild) buildWorld();
+    $('beanCount').textContent = '🧦 ' + state.socks;
+    DECOR.forEach(d => {
+      const el = $('beanHome').querySelector(`[data-buy="${d.id}"]`); if (!el) return;
+      const has = !!state.decor[d.id], can = !has && state.socks >= d.c;
+      el.setAttribute('class', 'spot ' + d.id + (has ? ' owned' : ' locked') + (can ? ' can' : ''));
+      el.setAttribute('aria-label', has ? d.n + ', in Bean’s world' : `${d.n}, costs ${d.c} socks${can ? '' : ', not enough socks yet'}`);
+    });
+    wDraw(0);
+  }
+  function beanTap() { wstate = 'wave'; wuntil = performance.now() + 1700; wKick(); beanSay(SAYS[Math.random() * SAYS.length | 0]); }
+  function buyOrSay(b) {
+    const d = DECOR.find(x => x.id === b.dataset.buy); if (!d) return;
+    if (state.decor[d.id]) { beanSay('I love my ' + d.n.toLowerCase() + '! 💛'); return; }
+    if (state.socks < d.c) { toast(`You need ${d.c - state.socks} more sock${d.c - state.socks === 1 ? '' : 's'} for the ${d.n.toLowerCase()}. Finish a timer round!`); return; }
+    state.socks -= d.c; state.decor[d.id] = true; saveState(); renderBean();
+    wstate = 'cheer'; wuntil = performance.now() + 1700; wKick(); burst(); beanSay('Thank you! 🎉'); toast(`${d.n} added to Bean’s world!`);
+  }
+  $('beanHome').addEventListener('click', e => {
+    const b = e.target.closest('[data-buy]'); if (b) return buyOrSay(b);
+    const ct = e.target.closest('[data-cat]');
+    if (ct) { ct.classList.add('purr'); burst('💗', 205, 215); setTimeout(() => ct.classList.remove('purr'), 1800); return; }
+    if (e.target.closest('[data-bean]')) beanTap();
+  });
+  $('beanHome').addEventListener('keydown', e => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const b = e.target.closest && e.target.closest('[data-buy]');
+    if (b) { e.preventDefault(); buyOrSay(b); } else if (e.target.closest && e.target.closest('[data-bean]')) { e.preventDefault(); beanTap(); }
+  });
+  document.addEventListener('visibilitychange', () => {
+    const t = state.timer;
+    if (t && t.phase === 'work' && t.stage === 'running') {
+      if (document.hidden) { t.hiddenAt = Date.now(); saveState(); }
+      else if (t.hiddenAt) {
+        const away = Date.now() - t.hiddenAt; t.hiddenAt = null;
+        if (away > 8000) { t.slips = (t.slips || 0) + 1; t.sadUntil = Date.now() + 20000; toast('Bean got sad when you left. 🥺'); }
+        saveState();
+      }
+    }
+    tick();
+    if (state.timer && state.timer.stage === 'running' && !document.hidden) renderFocus();
+  });
+
+  /* ---------- textbook questions: book upload, page offset, quiz ---------- */
+  let bookMeta = {}, bookCache = null, bookBusy = false, dbp = null, pdfP = null;
+  const PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+  const offsetFor = name => { const n = state.offsets[name]; return Number.isInteger(n) ? n : 1; };
+  const fail = code => Object.assign(new Error(code), {code});
+
+  // IndexedDB holds the page text (too big for localStorage). Nothing leaves the phone.
+  function openDB() {
+    if (dbp) return dbp;
+    dbp = new Promise((res, rej) => {
+      if (!window.indexedDB) return rej(fail('nodb'));
+      let rq;
+      try { rq = indexedDB.open('study-quest-books', 1); } catch (e) { return rej(fail('nodb')); }
+      rq.onupgradeneeded = () => { ['meta', 'text'].forEach(n => rq.result.createObjectStore(n, {keyPath:'subject'})); };
+      rq.onsuccess = () => res(rq.result);
+      rq.onerror = () => rej(fail('nodb'));
+    });
+    dbp.catch(() => { dbp = null; });
+    return dbp;
+  }
+  const idbReq = rq => new Promise((res, rej) => { rq.onsuccess = () => res(rq.result); rq.onerror = () => rej(rq.error); });
+  async function idbGet(store, key) { const db = await openDB(); return idbReq(db.transaction(store).objectStore(store).get(key)); }
+  async function idbAll(store) { const db = await openDB(); return idbReq(db.transaction(store).objectStore(store).getAll()); }
+  async function idbWrite(fn) {
+    const db = await openDB();
+    return new Promise((res, rej) => {
+      const tx = db.transaction(['meta', 'text'], 'readwrite');
+      tx.oncomplete = () => res();
+      tx.onerror = tx.onabort = () => rej(fail('save'));
+      fn(tx.objectStore('meta'), tx.objectStore('text'));
+    });
+  }
+  async function refreshBooks() {
+    try {
+      const all = await idbAll('meta');
+      bookMeta = {}; all.forEach(m => { if (m && byName(m.subject)) bookMeta[m.subject] = m; });
+      renderSubjects();
+    } catch (e) {}
+  }
+  async function getBookPages(name) {
+    if (bookCache && bookCache.name === name) return bookCache.pages;
+    const rec = await idbGet('text', name);
+    if (!rec || !Array.isArray(rec.pages)) throw fail('nobook');
+    bookCache = {name, pages:rec.pages};
+    return rec.pages;
+  }
+
+  // PDF.js is loaded from cdnjs only when a book is picked, so the app itself never depends on the internet.
+  function loadPdfJs() {
+    if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+    if (pdfP) return pdfP;
+    pdfP = new Promise((res, rej) => {
+      const sc = document.createElement('script');
+      const timer = setTimeout(() => { sc.remove(); rej(fail('nolib')); }, 20000);
+      sc.src = PDFJS + 'pdf.min.js';
+      sc.onload = () => {
+        clearTimeout(timer);
+        if (window.pdfjsLib) { window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + 'pdf.worker.min.js'; res(window.pdfjsLib); }
+        else rej(fail('nolib'));
+      };
+      sc.onerror = () => { clearTimeout(timer); sc.remove(); rej(fail('nolib')); };
+      document.head.append(sc);
+    });
+    pdfP.catch(() => { pdfP = null; });
+    return pdfP;
+  }
+  const LIG = {'ﬀ':'ff', 'ﬁ':'fi', 'ﬂ':'fl', 'ﬃ':'ffi', 'ﬄ':'ffl'};
+  const cleanStr = s => s.replace(/[ﬀ-ﬄ]/g, c => LIG[c]).replace(/[­]/g, '')
+    .replace(/[  -  ]/g, ' ').replace(/[\u0000-\u0008\u000B-\u001F]/g, ' ');
+  // Turn PDF.js text items into lines of text (one line per printed line).
+  function itemsToText(items) {
+    const lines = []; let line = '', px = null, pw = 0, py = 0;
+    for (const it of items) {
+      if (typeof it.str !== 'string') continue;
+      const str = cleanStr(it.str), x = it.transform ? it.transform[4] : 0, y = it.transform ? it.transform[5] : 0, h = it.height || 10;
+      if (px !== null) {
+        if (Math.abs(y - py) >= h * .6) { lines.push(line); line = ''; }
+        else if (x - (px + pw) > h * .15 && !/\s$/.test(line) && !/^\s/.test(str)) line += ' ';
+      }
+      line += str; px = x; pw = it.width || 0; py = y;
+      if (it.hasEOL) { lines.push(line); line = ''; px = null; }
+    }
+    if (line) lines.push(line);
+    return lines.map(l => l.replace(/\s+/g, ' ').trim()).filter(Boolean).join('\n');
+  }
+  async function importBook(name, file, say) {
+    if (bookBusy) { say('Still reading another book. Please wait a moment.'); return false; }
+    bookBusy = true;
+    try {
+      say('Loading the PDF reader…');
+      const lib = await loadPdfJs();
+      say('Opening the PDF…');
+      const pdf = await lib.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;
+      const n = pdf.numPages, pages = []; let textPages = 0;
+      for (let i = 1; i <= n; i++) {
+        if (i === 1 || i % 3 === 0 || i === n) say(`Reading page ${i} of ${n}…`);
+        const pg = await pdf.getPage(i), txt = itemsToText((await pg.getTextContent()).items);
+        pages.push(txt);
+        if (txt.replace(/\s/g, '').length >= 40) textPages++;
+        pg.cleanup();
+        if (i % 4 === 0) await new Promise(r => setTimeout(r));
+      }
+      pdf.destroy();
+      if (!textPages || textPages / n < .1) {
+        say('This PDF has no text I can read. It looks scanned (pictures of pages), and I cannot read scanned pages yet. Please choose a PDF where you can select the text.');
+        return false;
+      }
+      const meta = {subject:name, name:file.name || 'book.pdf', pageCount:n, textPages, savedAt:Date.now()};
+      try { await idbWrite((m, t) => { m.put(meta); t.put({subject:name, pages}); }); }
+      catch (e) { say('Could not save the book on this phone. The storage may be full or blocked by the browser.'); return false; }
+      bookMeta[name] = meta; bookCache = {name, pages}; renderSubjects();
+      say(`Saved ${meta.name}: ${textPages} of ${n} pages have readable text.` + (textPages < n * .6 ? ' The other pages look scanned, so quizzes cannot use them.' : ''));
+      return true;
+    } catch (err) {
+      const c = err && err.code, nm = err && err.name;
+      say(c === 'nolib' ? 'Could not load the PDF reader. It needs the internet once to download. Check your connection and try again. The rest of the app still works.'
+        : nm === 'PasswordException' ? 'This PDF is password protected. Remove the password and try again.'
+        : nm === 'InvalidPDFException' ? 'That file does not look like a valid PDF.'
+        : 'Could not read that PDF. Try another file.');
+      return false;
+    } finally { bookBusy = false; }
+  }
+
+  // Book panel: choose the PDF, set "printed page 1 = PDF page N", check the preview.
+  function openBook(name, firstMsg) {
+    openModal('Book: ' + name, box => {
+      let msg = firstMsg || '';
+      const body = document.createElement('div'), pick = document.createElement('input');
+      pick.type = 'file'; pick.accept = 'application/pdf,.pdf'; pick.hidden = true;
+      box.append(body, pick);
+      const say = t => { msg = t; const el = body.querySelector('#bkMsg'); if (el) el.textContent = t; };
+      const preview = async () => {
+        const r = rangeFor(byName(name)), idx = r[0] + offsetFor(name) - 1;
+        let pages = null;
+        try { pages = await getBookPages(name); } catch (e) {}
+        const head = body.querySelector('#bkHead'), prev = body.querySelector('#bkPrev'); if (!head || !prev) return;
+        if (!pages) { head.textContent = ''; prev.textContent = 'Could not open the saved book. Try replacing the PDF.'; return; }
+        head.textContent = `Printed page ${r[0]} (first page of your ${ord(currentQuarter())} quarter portion) = PDF page ${idx}. Does this match the top of that page in your book?`;
+        const txt = pages[idx - 1];
+        prev.textContent = idx < 1 || idx > pages.length ? `This PDF has ${pages.length} pages, so there is no PDF page ${idx}. Change the number above.`
+          : txt && txt.trim() ? txt.replace(/\s+/g, ' ').trim().slice(0, 360) + (txt.length > 360 ? '…' : '') : 'This PDF page has no readable text.';
+      };
+      const draw = () => {
+        const m = bookMeta[name];
+        body.innerHTML = `<p class="muted small">Pick the PDF of your ${esc(name)} book. It is read on this phone only. Nothing is uploaded.</p>
+          <p class="small" id="bkMsg" aria-live="polite" style="margin-top:8px">${esc(msg || (m ? `Saved: ${m.name} (${m.pageCount} pages, ${m.textPages} with text).` : 'No book added yet.'))}</p>
+          <div class="actions"><button class="btn primary" data-b="pick" type="button">${m ? 'Replace PDF' : 'Choose PDF'}</button>${m ? '<button class="btn danger" data-b="del" type="button">Remove book</button>' : ''}</div>
+          ${m ? `<div class="field" style="margin-top:16px"><label for="bkOff">Printed page 1 = PDF page</label>
+            <div class="bk-off"><button class="btn" data-b="minus" type="button" aria-label="One page earlier">−</button><input id="bkOff" type="number" step="1" inputmode="numeric" value="${offsetFor(name)}"><button class="btn" data-b="plus" type="button" aria-label="One page later">+</button></div></div>
+            <p class="small muted" id="bkHead" style="margin-top:10px"></p><div class="bk-prev" id="bkPrev"></div>` : ''}
+          <p class="muted small" style="margin-top:14px">How quizzes work: 5 fill-in-the-blank questions from your book's own sentences. The first Check or Show answer on a question decides right or wrong, and Next unlocks after that. A finished quiz gives 5 XP plus 2 per right answer. If the pages don't have 5 good sentences, you get fewer questions. Quiz me on a subject card covers the quarter's first page to your last saved page. The PDF reader is downloaded from the internet only when you pick a PDF, so the app still opens offline.</p>
+          <div class="actions"><button class="btn" data-b="close" type="button">Close</button></div>`;
+        if (m) preview();
+      };
+      const setOff = raw => {
+        const n = Number(raw);
+        if (String(raw).trim() === '' || !Number.isInteger(n) || Math.abs(n) > 4999) return;
+        state.offsets[name] = n; saveState(); preview();
+      };
+      body.addEventListener('click', async e => {
+        const b = e.target.closest('[data-b]'); if (!b || b.disabled) return;
+        const a = b.dataset.b, inp = body.querySelector('#bkOff');
+        if (a === 'pick') pick.click();
+        else if (a === 'close') closeModal();
+        else if (a === 'minus' || a === 'plus') { if (inp) { inp.value = (Number(inp.value) || 0) + (a === 'plus' ? 1 : -1); setOff(inp.value); } }
+        else if (a === 'del') {
+          if (!confirm('Remove this book from your phone? Your progress and quiz results are kept.')) return;
+          try { await idbWrite((m, t) => { m.delete(name); t.delete(name); }); } catch (err) {}
+          delete bookMeta[name]; if (bookCache && bookCache.name === name) bookCache = null;
+          msg = 'Book removed.'; draw(); renderSubjects();
+        }
+      });
+      body.addEventListener('input', e => { if (e.target.id === 'bkOff') setOff(e.target.value); });
+      pick.addEventListener('change', async () => {
+        const f = pick.files && pick.files[0]; if (!f) return;
+        body.querySelectorAll('button').forEach(x => { if (x.dataset.b !== 'close') x.disabled = true; });
+        await importBook(name, f, say);
+        pick.value = ''; draw();
+      });
+      draw();
+    });
+  }
+
+  /* QZ-PURE-START — deterministic candidate builder + strict quality gate */
+  const PH = '';
+  const STOP = new Set(('a an the and or but if of to in on at by for with from as is are was were be been being this that these those it its they them their there here which who whom whose what when where while than then also can may will would should could has have had not no do does did into onto over under between among about after before during through such each other more most some any all both only very one two three sometimes often usually always never generally mostly many several various different certain common however therefore because although another used made found called known given shown use uses using make makes made find finds found call calls called know knows known give gives given show shows shown more less much little quite rather too very almost nearly enough especially particularly frequently rarely seldom often generally mainly primarily perhaps maybe likely clearly simply usually together often now later first second third once twice every ever even still just already yet instead further thus hence otherwise moreover consequently nevertheless accordingly except including according via per their our your yours yourself themselves somebody someone something anything nothing everyone everything many much few several enough both either neither each such same different various particular another every all any no none both less least own whole entire certain several certain common general important significant large small high low good bad new old same only other first last next following previous above below figure table example page chapter section unit lesson topic results result shown discussed described mentioned given explained introduced defined means refers relates called known termed defined generally mostly different common typical usual usual similar various include includes including contains consists comprises requires involves occurs occurs become became becoming appear appears provide provides produces caused causes interrupted interrupts decrease decreases occurs occur grow grows growing live lives lived increases increased reduces reduced changes change changed affects affect affected moves move moved flows flow flowed produces produced transfers transfer transferred absorbs absorbed completes completed won wins uses used makes made').split(/\s+/));
+  const START_BAD = /^(?:sometimes|often|usually|always|never|generally|mostly|many|several|various|different|certain|common|it|this|these|those|they|he|she|we|you|your|however|but|and|also|then|therefore|thus|moreover|because|although|while|first|next|finally|in addition)\b/i;
+  const CONTEXT = /\b(?:above|below|following|previous|figure|fig\.|table|example|you|your|as mentioned|in this section|the text)\b/i;
+  // Reject sentences whose subject depends on an earlier sentence, especially vague 'it is the largest...' claims.
+  const VAGUE_REFERENCE = /^(?:with\s+(?:an?\s+)?area\s+of|it\s+is\s+the\s+|they\s+are\s+the\s+|this\s+is\s+the\s+)/i;
+  const UNSAFE_SUPERLATIVE = /\b(?:largest|smallest|biggest|greatest|highest|lowest|longest|shortest|oldest|newest|fastest|slowest|deepest|widest|hottest|coldest|richest|poorest|most|least)\b/i;
+  const EXERCISE_RE = /^(?:exercises?|review|unit review|self[- ]?test|test yourself|check your|assignments?|assessment|practice|መልመጃ|ልምምድ|ክለሳ|ጥያቄ|shaakala|gaaffilee|gaaffii)\b/i;
+  const HEAD_RE = /^(?:unit|chapter|section|lesson|topic|objectives?|learning objectives|learning outcomes|key terms?|summary|glossary|references|contents|table of contents|activity|group work|worked example|ማውጫ|ይዘት|ማጠቃለያ|እንቅስቃሴ|qabiyyee|cuunfaa|hojii)\b/i;
+  const CAPTION_RE = /^(?:figure|fig\.?|table|diagram|graph|chart|illustration|photo|image)\s*\d/i;
+  const IMPER = /^(?:define|explain|calculate|find|solve|discuss|list|describe|write|choose|match|fill|complete|answer|identify|compare|draw|determine|prove|simplify|evaluate|give|name|read|look|observe|try|suppose|consider|assume|mention|predict|classify|label)\b/i;
+  const ABBR = /\b(?:e\.g|i\.e|etc|vs|Fig|fig|Dr|Mr|Mrs|Ms|approx|cf|Prof)\./g;
+  const normAns = x => String(x).toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^\p{L}\p{N}]+/gu, '');
+  function tocPage(lines) {
+    if (lines.slice(0,4).some(l => /^(?:table of )?contents?$/i.test(l.trim()) || /^(?:ማውጫ|ይዘት|qabiyyee)$/i.test(l.trim()))) return true;
+    const n=lines.filter(l=>/(?:\.{3,}|…|\s)\d{1,3}\s*$/.test(l)&&!/[.!?።]\s*$/.test(l)).length;
+    return lines.length>0 && n>=5 && n/lines.length>.3;
+  }
+  function goodLine(l) {
+    const w=l.split(/\s+/).length;
+    if (/^\d+$/.test(l)||/\.{3,}|…/.test(l)||CAPTION_RE.test(l)||/^(?:\d+[.)]|\(?[a-dA-D][.)]|[•▪●◦■□–-])\s/.test(l)) return false;
+    if (HEAD_RE.test(l)&&w<=8) return false;
+    if (/[A-Z]/.test(l)&&l===l.toUpperCase()&&w<=12) return false;
+    return true;
+  }
+  const joinLines=(a,b)=>/[A-Za-z]-$/.test(a)&&/^[a-z]/.test(b)?a.slice(0,-1)+b:a+' '+b;
+  function splitSentences(p) {
+    return (p.replace(ABBR,m=>m.slice(0,-1)+'\u0001').match(/[\s\S]+?(?:[.!?]+(?=\s|$)|[።፧]+|$)/g)||[]).map(x=>x.replace(/\u0001/g,'.').trim()).filter(Boolean);
+  }
+  function pageSentences(text) {
+    const lines=text.split('\n'); if(tocPage(lines)) return [];
+    const paras=[]; let cur='';
+    const cut=()=>{if(cur)paras.push(cur);cur='';};
+    for(const raw of lines) {
+      const l=raw.trim(), w=l.split(/\s+/).length;
+      if(!l){cut();continue;}
+      if(w<=6&&EXERCISE_RE.test(l)) break;
+      if(!goodLine(l)){cut();continue;}
+      cur=cur?joinLines(cur,l):l;
+      if(/[.!?።፧]["'”’)\]]?$/.test(l)) cut();
+    }
+    cut(); return paras.flatMap(splitSentences).filter(Boolean);
+  }
+  const TOK_RE=/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu;
+  function tokens(s){return [...s.matchAll(TOK_RE)].map(m=>({w:m[0],i:m.index}));}
+  function isStop(w,lang='en') {
+    const x=w.toLowerCase();
+    if (/ly$/i.test(x)) return true;
+    if (STOP.has(x)) return true;
+    if (lang==='am') return ['እና','ወይም','ነው','ናቸው','ይህ','ይህን','እነዚህ','በ','ለ','ከ','ወደ','ላይ','ውስጥ','ብዙ'].includes(x);
+    if (lang==='om') return ['fi','yookaan','kan','kun','isaan','inni','ishee','akka','irra','keessa','gara','dha','taʼe','tahe','baayʼee'].includes(x);
+    return false;
+  }
+  // Generic words that make a poor blank on their own (nouns like 'process', and verbs like 'carries').
+  const GENERIC = new Set(('process processes movement movements type types kind kinds form forms part parts result results amount amounts number numbers group groups series sustained sustain sustains carries carried carrying organelles organelle structure structures pattern patterns variety variation variations category categories activity activities feature features factor factors method methods aspect aspects member members situation situations condition conditions characteristic characteristics portion releases released releasing controls controlled controlling supports supported supporting allows allowed allowing enables enabled enabling performs performed performing develops developed developing remains remained maintains maintained maintaining protects protected protecting connects connected connecting converts converted converting contributes depends determines determined determining creates created creating transports transported transporting regulates regulated regulating').split(/\s+/));
+  // Sentence opens with a definition: 'X is a/an/the ...', 'X are the ...', 'X refers to ...', 'X means ...', 'X is/are called ...' (X = 1 to 3 words).
+  const DEF_START = /^((?:(?:the|a|an)\s+)?[\p{L}][\p{L}'’-]*(?:\s+[\p{L}][\p{L}'’-]*){0,2})\s+(?:(?:is|are)\s+(?:called|known\s+as|defined\s+as|termed)|refers?\s+to|means|(?:is|are)\s+(?:a|an|the|one))\b/iu;
+  function defSubject(s) {
+    const m=DEF_START.exec(s); if(!m) return null;
+    let x=m[1], i=0; const art=/^(?:the|a|an)\s+/i.exec(x);
+    if(art){i=art[0].length;x=x.slice(i);}
+    const tk=x.split(/\s+/).map(z=>z.toLowerCase());
+    if(!x||tk.length>3||tk.some(z=>STOP.has(z))||tk.every(z=>GENERIC.has(z))) return null;
+    return {w:x,i};
+  }
+  function termSafe(t, sentence, lang) {
+    const w=t.w, n=[...w].length, lower=w.toLowerCase();
+    if(t.def) return n>=5 && /^[\p{L}][\p{L}'’ -]*$/u.test(w);
+    if(/\s/.test(w)){
+      const parts=w.split(/\s+/);
+      if(parts.length>3||n<8) return false;
+      if(parts.some(p=>isStop(p,lang)||GENERIC.has(p.toLowerCase())||[...p].length<3)) return false;
+      return parts.every(p=>/^\p{L}[\p{L}'’-]*$/u.test(p));
+    }
+    if(GENERIC.has(lower)) return false;
+    if(!/\p{L}/u.test(w) && !/^\d{4}$/.test(w)) return false;
+    if(isStop(w,lang)) return false;
+    if(/^\p{L}+$/u.test(w) && n<5) return false;
+    if(/^\p{L}+$/u.test(w) && n<7 && !/^\p{Lu}/u.test(w)) return false;
+    if(/^\p{L}+$/u.test(w) && /^\p{Lu}/u.test(w) && t.i===0 && lang==='en') return false;
+    if(lang!=='en' && /^\p{L}+$/u.test(w) && n<7) return false;
+    if(/^\p{L}+$/u.test(w) && !/^\p{Lu}/u.test(w) && !/^\p{L}{7,}$/u.test(w)) return false;
+    if(/^\p{L}+$/u.test(w) && /^\p{Lu}/u.test(w) && t.i===0 && !/^[\p{L}][\p{L}'’-]*\s+(?:is|are)\s+(?:called|known as|defined as|termed|a|an|the)\b/i.test(sentence)) return false;
+    return true;
+  }
+  function keyCandidates(s, lang) {
+    const ts=tokens(s), out=[], add=(t,kind,priority)=>{if(t&&/['’]s$/i.test(t.w))t={...t,w:t.w.replace(/['’]s$/i,'')};if(t&&termSafe(t,s,lang))out.push({term:t.w,kind,priority,index:t.i});};
+    if(lang==='en') {
+      let m;
+      const ds=defSubject(s); if(ds) add({w:ds.w,i:ds.i,def:true},'definition',120);
+      const def1=/\b([\p{L}][\p{L}'’-]*(?:\s+[\p{L}][\p{L}'’-]*){0,2})\s+(?:is|are)\s+(?:called|known as|defined as|termed)\s+([\p{L}][\p{L}'’-]*(?:\s+[\p{L}][\p{L}'’-]*){0,3})/giu;
+      while((m=def1.exec(s))) {
+        const subject=tokens(m[1]).at(-1), pred=tokens(m[2])[0];
+        if(subject) add({w:subject.w,i:m.index},'definition',100);
+        if(pred) add({w:pred.w,i:m.index+m[0].indexOf(m[2])},'definition',98);
+      }
+      const def2=/\b([\p{L}][\p{L}'’-]*)\s+(?:refers to|means)\b/giu;
+      while((m=def2.exec(s))) {const t={w:m[1],i:m.index};add(t,'definition',100);}
+      const def3=/\b([\p{L}][\p{L}'’-]*)\s+is\s+(?:a|an|the)\s+([\p{L}][\p{L}'’-]*)/giu;
+      while((m=def3.exec(s))) {add({w:m[1],i:m.index},'definition',95);add({w:m[2],i:m.index+m[0].lastIndexOf(m[2])},'definition',94);}
+      const also=/\b([\p{L}][\p{L}'’-]*),\s*also called\s+([\p{L}][\p{L}'’-]*)/giu;
+      while((m=also.exec(s))) add({w:m[2],i:m.index+m[0].lastIndexOf(m[2])},'definition',96);
+    }
+    // Year/date or number+unit, never a bare arbitrary number.
+    for(const m of s.matchAll(/\b(?:1[0-9]{3}|20[0-9]{2})\b/g)) add({w:m[0],i:m.index},'date',80);
+    for(const m of s.matchAll(/\b\d+(?:\.\d+)?\s*(?:%|°C|°F|km\/h|km|cm|mm|m|kg|g|mg|L|ml|s|seconds?|minutes?|hours?|days?|years?|hectares?|acres?|volts?|watts?|joules?|newtons?|pascal(?:s)?|mol(?:es)?|Hz)\b/gi)) add({w:m[0].trim(),i:m.index},'number',78);
+    if(lang==='en') {
+      for(const t of ts) if(t.i>0 && /^\p{Lu}[\p{L}'’-]{2,}$/u.test(t.w) && !isStop(t.w,lang)) add(t,'proper',65);
+      for(const t of ts) if(/^\p{L}{7,}$/u.test(t.w) && !isStop(t.w,lang)) add(t,'technical',40);
+      // v4: multi-word key terms, preferred over lone words. Capitalised runs ("Great Rift Valley", "Robert Hooke").
+      for(let k=0;k<ts.length;){
+        let m=k;
+        while(m<ts.length&&/^\p{Lu}[\p{L}]*$/u.test(ts[m].w)&&(m===k||s.slice(ts[m-1].i+ts[m-1].w.length,ts[m].i).trim()==='')) m++;
+        if(m-k>=2){
+          let a=k; while(a<m&&STOP.has(ts[a].w.toLowerCase())) a++;
+          if(m-a>=2) add({w:s.slice(ts[a].i,ts[m-1].i+ts[m-1].w.length),i:ts[a].i},'multi',68);
+        }
+        k=Math.max(m,k+1);
+      }
+      // Lowercase noun phrases like "cell membrane": must follow an article or preposition so verbs are not picked up.
+      for(let k=0;k<ts.length-1;k++){
+        const a=ts[k], b=ts[k+1];
+        if(!/^\p{Ll}+$/u.test(a.w)||!/^\p{Ll}+$/u.test(b.w)) continue;
+        if(s.slice(a.i+a.w.length,b.i).trim()!=='') continue;
+        if(!/(?:^|\s)(?:the|an?|of|in|by|from|through|called|as|within|into)\s+$/i.test(s.slice(0,a.i))) continue;
+        if([a.w,b.w].some(x=>isStop(x,lang)||GENERIC.has(x))) continue;
+        if([...a.w].length>=4&&[...b.w].length>=7&&!/(?:ing|ly)$/.test(a.w)&&!/(?:ed|ing|ly|ous|ive|ful|less)$/.test(b.w)) add({w:a.w+' '+b.w,i:a.i},'multi',55);
+      }
+    } else {
+      // Conservative language-specific candidate rule: only longer lexical terms, never the longest-word fallback.
+      for(const t of ts) if(/^\p{L}{7,}$/u.test(t.w) && !isStop(t.w,lang)) add(t,'technical',35);
+    }
+    return out;
+  }
+  function formsOf(w) {
+    const x=w.toLowerCase(); const forms=new Set([x]);
+    if(x.length>=5){forms.add(x+'s');forms.add(x+'es');if(x.endsWith('y'))forms.add(x.slice(0,-1)+'ies');if(x.endsWith('e')){forms.add(x.slice(0,-1)+'ing');forms.add(x.slice(0,-1)+'ed');}else{forms.add(x+'ing');forms.add(x+'ed');}}
+    if(x.length>=6) forms.add(x.slice(0,6));
+    return [...forms].filter(z=>z.length>=4);
+  }
+  function blankOut(sent,term) {
+    const safe=term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    const patterns=[safe];
+    if(/^\p{L}{7,}$/u.test(term)) patterns.push(term.slice(0,6).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\p{L}*');
+    return sent.replace(new RegExp('(^|[^\\p{L}\\p{N}])(?:'+patterns.join('|')+')(?![\\p{L}\\p{N}])','giu'),(m,pre)=>pre+PH);
+  }
+  function goodSentence(s, eth=false) {
+    const lang=eth==='am'?'am':eth==='om'?'om':'en', ts=tokens(s), n=ts.length;
+    if(n<10||n>30||!/[.!?።]$/.test(s)||/[?፧]$/.test(s)) return false;
+    if(START_BAD.test(s)||CONTEXT.test(s)||EXERCISE_RE.test(s)||HEAD_RE.test(s)||CAPTION_RE.test(s)||IMPER.test(s)) return false;
+    // Hard regression guard: this textbook pattern is not a standalone fact and must never become a blank.
+    // Also reject area/size lead-ins even if the wording changes slightly.
+    if(/^with\s+(?:(?:an?|the)\s+)?(?:area|size|length|width|height|population)\s+of\b/i.test(s)) return false;
+    if(/\b(?:square\s+kilometers?|square\s+kilometres?|km²|km\^2)\b/i.test(s) && /\bhot\s+desert\b/i.test(s)) return false;
+    if(VAGUE_REFERENCE.test(s)) return false;
+    // v4: sentences that lean on earlier text, filler wording, headings/captions or glued PDF fragments.
+    if(lang==='en'){
+      if(CONNECT_BAD.test(s)||FILLER.test(s)||BAD_OPEN.test(s)||JOINED.test(s)) return false;
+      if(/[:;]/.test(s)||/\b(?:Unit|Chapter|Section|Lesson|Figure|Fig|Table|Activity|Exercise|Page)\s*\.?\s*\d/.test(s)) return false;
+      if(/\b[A-Z]\.$/.test(s)||(s.match(/["“”]/g)||[]).length%2) return false;
+      if(ts.slice(1).filter(t=>/^\p{Lu}/u.test(t.w)).length/n>0.45) return false;
+    }
+    // Superlative-only claims are usually poor blanks; keep established definition patterns such as 'smallest unit'.
+    if(/\b(?:largest|biggest|greatest|highest|lowest|longest|shortest|oldest|newest|fastest|slowest|deepest|widest|hottest|coldest|richest|poorest)\b/i.test(s) && !/\b(?:smallest\s+unit|smallest\s+particle|highest\s+temperature|lowest\s+temperature)\b/i.test(s)) return false;
+    // Do not turn rankings/superlatives into blanks: they often depend on missing context or disputed scope.
+    if(UNSAFE_SUPERLATIVE.test(s)) return false;
+    if(/^[\s•▪●◦■□\-–\d(]/.test(s)||/[=<>→←±×÷∑√]/.test(s)) return false;
+    if(/\[[^\]]*\]|\([^)]*\)/.test(s)) return false;
+    if(lang==='en' && !/^[A-Z]/.test(s)) return false;
+    if(!/[\p{L}]/u.test(s)) return false;
+    return true;
+  }
+  const lev=(a,b)=>{const x=[...a],y=[...b];let prev=Array.from({length:y.length+1},(_,j)=>j);for(let i=1;i<=x.length;i++){const cur=[i];for(let j=1;j<=y.length;j++)cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(x[i-1]===y[j-1]?0:1));prev=cur;}return prev[y.length];};
+  function sameAnswer(inp,ans) {
+    const x=normAns(inp),y=normAns(ans),n=[...y].length;if(!x)return false;if(x===y)return true;if(/^\d/.test(y))return false;
+    if(n>=5&&(x===y+'s'||x+'s'===y||x===y+'es'||x+'es'===y))return true;
+    return n>=8&&lev(x,y)<=1;
+  }
+  /* ---- v4 quality layer: score sentences, gate ambiguous blanks ---- */
+  // Words that point back to earlier text, so the sentence is not self-contained.
+  const CONNECT_BAD=/\b(?:it|they|them|these|those|this|such|also|hence|thus|therefore|moreover|furthermore|similarly|likewise|consequently|however|nevertheless|respectively|latter|former|aforementioned|same|another|whereas|besides|meanwhile|thereby)\b/i;
+  // Vague or evaluative filler: nothing a student could pin down.
+  const FILLER=/\b(?:important|importance|significant|vital|crucial|very|many|various|several|lots? of|a lot of|so-called|etc|and so on|in general|in some cases|for (?:example|instance)|such as|e\.g|i\.e)\b/i;
+  const BAD_OPEN=/^(?:for (?:example|instance)|in (?:addition|contrast|fact|particular|general|other words)|on the other hand|as a result|because of (?:this|that)|another|other|one|each|both|so|yet|or|nor|despite|although|though|whereas|after (?:this|that)|before (?:this|that))\b/i;
+  // Two sentence fragments glued together by PDF extraction (lowercase word, then a capitalised sentence starter).
+  const JOINED=/\b[a-z]{2,}\s+(?:The|In|On|It|This|These|They|As|When|If|Some|Many|There|For|At|By|To)\s+[a-z]/;
+  const DEFV_RE=/\b(?:is called|are called|known as|refers? to|defined as|is defined|means|termed|is the (?:study|science|process|ability|branch|measure|movement))\b/i;
+  const CAUSE_RE=/\b(?:because|due to|caused by|causes|cause|results? in|resulted in|leads? to|led to|as a result of|responsible for|depends? on|formed by|formed when|are formed|is formed|occurs? when|located (?:in|on|at)|situated (?:in|on|at)|found (?:in|on|at)|flows? (?:into|through|from)|bounded by|consists? of|composed of|made up of|divided into|classified (?:as|into)|discovered|invented|founded|established|signed|declared|observed|began|ended|born|died|produces?|absorbs?|releases?|controls?|prevents?|protects?)\b/i;
+  const KIND_W={definition:35,date:30,number:20,proper:12,multi:15,technical:0};
+  // How well does the sentence stand on its own? Definition, cause and effect, date, number with unit, named place or person.
+  function sentScore(s,lang){
+    const ts=tokens(s), n=ts.length;
+    let q=lang==='en'?0:20;
+    if(defSubject(s)||DEFV_RE.test(s)) q+=35;
+    if(CAUSE_RE.test(s)) q+=20;
+    if(/\b(?:1[0-9]{3}|20[0-9]{2})\b/.test(s)) q+=20;
+    if(/\b\d+(?:\.\d+)?\s*(?:°C|°F|km|cm|mm|kg|mg|g|m|L|ml|years?|days?|hours?|minutes?|seconds?|hectares?|meters?|metres?|kilometers?|kilometres?)\b/i.test(s)) q+=10;
+    const caps=ts.slice(1).filter(t=>/^\p{Lu}/u.test(t.w)).length;
+    if(caps>=1&&caps<=4) q+=10;
+    if(n>=12&&n<=26) q+=10;
+    return q;
+  }
+  // Would a student who knows the topic be able to answer this blank? -1 means no; otherwise a quality score.
+  function blankScore(sent,c,lang,ss){
+    const t=c.term, multi=/\s/.test(t), before=sent.slice(0,c.index), after=sent.slice(c.index+t.length);
+    const isNum=c.kind==='date'||c.kind==='number';
+    // List items and "X or Y" alternatives: many words fit.
+    if(!isNum&&(/^['’]?s?\s*(?:,|\/|;|\)|\b(?:or|and|nor)\b)/i.test(after)||/\b(?:or|and|nor|but|between)\s+(?:the\s+|an?\s+)?$/i.test(before))) return -1;
+    // The rest of the sentence must carry enough specific words to point at the answer.
+    const restTok=tokens(before+' '+after).filter(x=>[...x.w].length>=6&&!isStop(x.w,lang)).length;
+    if(lang==='en'){
+      if(restTok<(isNum?1:2)) return -1;
+      if(c.kind==='technical'){
+        if(/(?:ed|ing|ly|ous|ive|ful|less|able|ible)$/i.test(t)||c.index<6) return -1;
+        if(/\b(?:part|kind|type|types|form|forms|number|variety|range|series|set|group|sort|piece|lot|amount|level|sense|way|ways|case|cases|result|one|some|all|each)\s+of\s+(?:an?|the|their|its)?\s*$/i.test(before)) return -1;
+        if(!(DEFV_RE.test(sent)||CAUSE_RE.test(sent))) return -1;
+      }
+      // a capitalised word used as a modifier ("the Ethiopian highlands") has many possible fillers
+      if(c.kind==='proper'&&/^\s+[a-z]{4,}/.test(after)&&!isStop(after.trim().split(/\s+/)[0],lang)) return -1;
+      if(c.kind==='proper'&&!(defSubject(sent)||DEFV_RE.test(sent)||CAUSE_RE.test(sent)||/\b(?:1[0-9]{3}|20[0-9]{2})\b/.test(sent))) return -1;
+    }
+    return ss+(KIND_W[c.kind]||0)+(multi?10:0)+Math.min(restTok,4)*2;
+  }
+  const QZ_MEM=new Map(); // per-subject memory of sentences already used in earlier quizzes
+  const formsFor=w=>/\s/.test(w)?tokens(w).filter(z=>[...z.w].length>=5).flatMap(z=>formsOf(z.w)):formsOf(w);
+  function makeQuiz(pages,a,b,off,simple,eth,opts) {
+    opts=opts||{};
+    const lang=(eth===true||eth==='am')?'am':eth==='om'?'om':'en', cands=[], seen=new Set(), blocked=new Set((state.quizBlocklist||[]).map(normAns)), blockedS=new Set((state.quizBlocklist||[]).filter(x=>/^Q:/.test(x)).map(normAns));
+    for(let p=a;p<=b;p++) {
+      const txt=pages[p+off-2];if(!txt)continue;
+      pageSentences(txt).forEach(sent=>{
+        if(!goodSentence(sent,lang))return;
+        const sk=normAns(sent);if(seen.has(sk))return;seen.add(sk);
+        if(blockedS.has('q'+sk))return; // sentence was flagged "Bad question" before
+        const ss=sentScore(sent,lang), MINQ=lang==='en'?55:30;
+        const all=keyCandidates(sent,lang).filter(c=>!blocked.has(normAns(c.term)));
+        all.forEach(c=>{c.q=blankScore(sent,c,lang,ss);});
+        all.sort((x,y)=>y.q-x.q||y.priority-x.priority);
+        for(const c of all) {
+          if(c.q<MINQ)break; // weak or ambiguous blank: drop it (fewer but better questions)
+          const answer=c.term;
+          if(answer.length<1||isStop(answer,lang))continue;
+          const rest=sent.slice(0,c.index)+sent.slice(c.index+answer.length);
+          const forms=formsFor(answer);
+          if(forms.some(f=>new RegExp('(^|[^\\p{L}\\p{N}])'+f.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?![\\p{L}\\p{N}])','iu').test(rest)))continue;
+          const text=blankOut(sent,answer);if(!text.includes(PH))continue;
+          // One blank only; multiple occurrences or morphology are ambiguous.
+          if((text.match(new RegExp(PH,'g'))||[]).length!==1)continue;
+          const len=[...normAns(answer)].length, first=[...answer][0].toLowerCase(), words=answer.trim().split(/\s+/).length, wl=words>1?`${words} words, ${len} letters`:`${len} letters`;
+          cands.push({page:p,text,answer,sent,sk,hint:wl,hintFull:`Starts with “${first}”, ${wl}`,score:c.q,kind:c.kind,concept:normAns(answer)});
+          break;
+        }
+      });
+    }
+    // Pick 5 from the whole pool: random, weighted by score (and by past wrong answers on that page).
+    // One candidate per sentence, max 2 per page (when the range has >1 page), sentences used in earlier quizzes come last.
+    const rand=opts.rand||Math.random, boost=opts.boost||{}, key=opts.key||'default';
+    let mem=QZ_MEM.get(key); if(!mem){mem={n:0,last:new Map()};QZ_MEM.set(key,mem);}
+    const cap=b>a?2:Infinity, perPage={}, used=new Set(), out=[];
+    const wt=c=>Math.max(1,c.score)*(1+0.5*Math.min(boost[c.page]||0,4));
+    const age=c=>mem.last.get(c.sk)||0;
+    while(out.length<5) {
+      const ok=cands.filter(c=>!c.picked&&(perPage[c.page]||0)<cap&&!used.has(c.concept));
+      if(!ok.length)break;
+      const lo=Math.min(...ok.map(age)), tier=ok.filter(c=>age(c)===lo);
+      let r=rand()*tier.reduce((s,c)=>s+wt(c),0), c=tier[tier.length-1];
+      for(const x of tier){r-=wt(x);if(r<=0){c=x;break;}}
+      c.picked=true;out.push(c);perPage[c.page]=(perPage[c.page]||0)+1;used.add(c.concept);
+    }
+    if(out.length){
+      mem.n++;out.forEach(c=>mem.last.set(c.sk,mem.n));
+      if(mem.last.size>3000)[...mem.last.entries()].sort((x,y)=>x[1]-y[1]).slice(0,mem.last.size-3000).forEach(([k])=>mem.last.delete(k));
+    }
+    return out.sort((x,y)=>x.page-y.page);
+  }
+  /* QZ-PURE-END */
+
+  async function startQuiz(name, a, b) {
+    const r = rangeFor(byName(name));
+    a = Math.max(r[0], a); b = Math.min(r[1], b);
+    if (a > b) { toast('Study some pages of ' + name + ' first, then quiz yourself.'); return; }
+    if (!bookMeta[name]) { openBook(name, 'Add the PDF of this book first, then tap Quiz me.'); return; }
+    let pages;
+    try { pages = await getBookPages(name); } catch (e) { openBook(name, 'Could not open the saved book. Please add the PDF again.'); return; }
+    runQuiz(name, a, b, pages);
+  }
+  function runQuiz(name, a, b, pages) {
+    const simple = name === 'Amharic' || name === 'Afaan Oromoo', quarter = currentQuarter();
+    const boost = () => { const o = {}; state.quiz.forEach(e => { if (e && e.s === name && e.ok === false) o[e.p] = (o[e.p] || 0) + 1; }); return o; };
+    const make = () => makeQuiz(pages, a, b, offsetFor(name), simple, name === 'Amharic' ? 'am' : name === 'Afaan Oromoo' ? 'om' : false, {key:name, boost:boost()})
+      .map(q => ({...q, src:`${name}, page ${q.page}`, done:false, ok:false}));
+    let qs = make(), i = 0, right = 0, scored = false;
+    if (!qs.length) {
+      openModal('No questions yet', box => {
+        const p = document.createElement('p'); p.textContent = 'I could not make questions from these pages. They may be mostly pictures, exercises or formulas, or the page offset may be off. Check the preview in Book, or study a few more pages.';
+        const row = document.createElement('div'); row.className = 'actions';
+        const bBook = document.createElement('button'); bBook.type = 'button'; bBook.className = 'btn primary'; bBook.textContent = 'Check Book settings';
+        bBook.onclick = () => { closeModal(); openBook(name); };
+        const bClose = document.createElement('button'); bClose.type = 'button'; bClose.className = 'btn'; bClose.textContent = 'Close'; bClose.onclick = closeModal;
+        row.append(bBook, bClose); box.append(p, row);
+      });
+      return;
+    }
+    openModal('Quiz: ' + name, box => {
+      const body = document.createElement('div'); body.className = 'qz'; box.append(body);
+      const fb = (html, cls) => { const el = body.querySelector('#qzFb'); if (el) { el.className = 'qz-fb ' + (cls || ''); el.innerHTML = html; } };
+      // The first Check or Show answer decides right or wrong and is saved for the later Memory Map.
+      const record = q => {
+        if (q.ok) right++;
+        q.done = true;
+        state.quiz.push({s:name, q:quarter, p:q.page, ok:q.ok, d:todayKey()});
+        if (state.quiz.length > 2000) state.quiz.splice(0, state.quiz.length - 2000);
+        saveState();
+        const nx = body.querySelector('[data-q="next"]'); if (nx) nx.disabled = false;
+      };
+      const draw = () => {
+        if (i >= qs.length) { score(); return; }
+        const q = qs[i], last = i === qs.length - 1;
+        body.innerHTML = `<div class="row small muted"><span>Question ${i + 1} of ${qs.length}</span><button class="link" data-q="stop" type="button">Stop</button></div>
+          <p class="qz-src">📖 ${esc(q.src)}</p>
+          <p class="qz-sent">${esc(q.text).split(PH).join('<mark>_____</mark>')}</p>
+          <p><span class="qz-hint" id="qzHint">${esc(q.hint)}</span> <button class="link" data-q="hint" type="button">Show first letter</button></p>
+          ${simple ? '<p class="muted small">Amharic and Afaan Oromoo use conservative term selection; question accuracy may be lower.</p>' : ''}
+          ${qs.length < 5 && i === 0 ? `<p class="muted small">Only ${qs.length} question${qs.length === 1 ? '' : 's'} fit these pages.</p>` : ''}
+          <div class="field"><label for="qzIn">Your answer</label><input id="qzIn" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done"></div>
+          <p class="qz-fb" id="qzFb" aria-live="polite"></p>
+          <button class="go" data-q="check" type="button">Check</button>
+          <div class="qz-row"><button class="btn" data-q="show" type="button">Show answer</button><button class="btn" data-q="next" type="button" disabled>${last ? 'See score' : 'Next'}</button></div><button class="btn danger" data-q="bad" type="button" style="width:100%">Bad question</button>`;
+        body.querySelector('#qzIn').focus();
+      };
+      const check = () => {
+        const q = qs[i], inp = body.querySelector('#qzIn'); if (!q || !inp) return;
+        if (!normAns(inp.value)) { fb('Type your answer first, or tap Show answer.', 'bad'); return; }
+        const ok = sameAnswer(inp.value, q.answer), first = !q.done;
+        if (first) { q.ok = ok; record(q); }
+        fb(ok ? (first ? '✅ Correct!' : '✅ That is it. Your first try counts for the score.') : 'Not quite. Try again, or tap Show answer.', ok ? 'ok' : 'bad');
+      };
+      const show = () => {
+        const q = qs[i]; if (!q) return;
+        if (!q.done) { q.ok = false; record(q); }
+        fb('Answer: <strong>' + esc(q.answer) + '</strong>');
+      };
+      const score = () => {
+        if (!scored) {
+          scored = true;
+          act(info => { state.xp += XP_QUIZ + XP_QUIZ_RIGHT * right; info.lines.push(`✏️ Quiz done: ${right} of ${qs.length}`); }, {undo:false});
+        }
+        const missed = qs.filter(q => !q.ok);
+        body.innerHTML = `<div class="numline"><span class="num">${right} / ${qs.length}</span><span>correct</span></div>
+          <p>${right === qs.length ? '🌟 Perfect round!' : right >= qs.length / 2 ? '👍 Good work. Look at the ones you missed.' : '💪 Keep going. Read those pages again, then try another quiz.'}</p>
+          ${missed.length ? `<div class="small"><strong>Review:</strong>${missed.map(q => `<p>${esc(q.text).split(PH).join('<strong>' + esc(q.answer) + '</strong>')} <span class="muted">(${esc(q.src)})</span></p>`).join('')}</div>` : ''}
+          <button class="go" data-q="again" type="button">Quiz again</button>
+          <button class="btn" data-q="close" type="button" style="width:100%">Close</button>`;
+      };
+      body.addEventListener('click', e => {
+        const t = e.target.closest('[data-q]'); if (!t || t.disabled) return;
+        const k = t.dataset.q;
+        if (k === 'check') check();
+        else if (k === 'show') show();
+        else if (k === 'hint') { body.querySelector('#qzHint').textContent = qs[i].hintFull; t.hidden = true; }
+        else if (k === 'bad') {
+          const q = qs[i];
+          if (q && q.answer) {
+            if (!state.quizBlocklist.some(x => normAns(x) === normAns(q.answer))) state.quizBlocklist.push(q.answer);
+            if (q.sent && !state.quizBlocklist.some(x => normAns(x) === normAns('Q:' + q.sent))) state.quizBlocklist.push('Q:' + q.sent);
+            saveState();
+            qs = qs.filter((x,j) => j !== i && normAns(x.answer) !== normAns(q.answer) && x.sent !== q.sent);
+            if (i >= qs.length) i = Math.max(0, qs.length - 1);
+            toast('Question and word blocked. They will not come back.');
+            draw();
+          }
+        }
+        else if (k === 'next') { i++; draw(); }
+        else if (k === 'again') { qs = make(); i = 0; right = 0; scored = false; draw(); }
+        else closeModal();
+      });
+      body.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'qzIn') { e.preventDefault(); check(); } });
+      draw();
+    }, {sticky:true});
+  }
+
+  /* ---------- page events ---------- */
+  $('hero').addEventListener('click', e => {
+    const b = e.target.closest('[data-h]'); if (!b) return;
+    const list = smartList(); if (!list.length) return;
+    const s = list[pickIdx % list.length], h = b.dataset.h;
+    if (h === 'sprint') startSession(s.name, 'sprint');
+    else if (h === 'pomo') startSession(s.name, 'pomodoro');
+    else if (h === 'swap') { pickIdx++; renderHero(); const x = $('hero').querySelector('[data-h="swap"]'); if (x) x.focus(); }
+    else if (h === 'hard') {
+      const go = () => {
+        const hs = byName(state.hardest);
+        if (hs && !isFinished(hs)) startSession(hs.name, 'hardest');
+        else { toast('Your hardest subject is finished, so here is the next best pick.'); startSession(s.name, 'sprint'); }
+      };
+      if (!state.hardest) pickSubject('Which subject is hardest for you?', n => { state.hardest = n; saveState(); go(); }, {all:true});
+      else go();
+    }
+  });
+  $('today').addEventListener('click', e => {
+    if (e.target.closest('#tdSetDate')) { $('setup').open = true; $('testdate').scrollIntoView({block:'center'}); $('testdate').focus(); }
+    else if (e.target.closest('#shareBtn')) shareStreak();
+  });
+  $('subjects').addEventListener('click', e => {
+    const add = e.target.closest('[data-add]'), edit = e.target.closest('[data-edit]'), bk = e.target.closest('[data-book]'), qz = e.target.closest('[data-quiz]');
+    if (bk) openBook(bk.dataset.book);
+    else if (qz) { const nm = qz.dataset.quiz, sj = byName(nm); startQuiz(nm, rangeFor(sj)[0], lastEffective(sj)); }
+    else if (add) quickAdd(add.dataset.name, Number(add.dataset.add));
+    else if (edit) {
+      const name = edit.dataset.edit;
+      $('manualFold').open = true; $('subjectpick').value = name;
+      const p = state.progress[keyFor(name)]; $('lastpage').value = p == null ? '' : p;
+      $('lastpage').scrollIntoView({block:'center'}); $('lastpage').focus();
+    }
+  });
+  $('quarter').addEventListener('change', () => { state.quarter = currentQuarter(); pickIdx = 0; render(); $('lastpage').value = state.progress[keyFor($('subjectpick').value)] ?? ''; $('feedback').textContent = 'Showing the selected quarter’s page ranges.'; });
+  $('testdate').addEventListener('change', () => { state.date = $('testdate').value; render(); });
+  $('subjectpick').addEventListener('change', () => { $('lastpage').value = state.progress[keyFor($('subjectpick').value)] ?? ''; });
+  $('hardestpick').addEventListener('change', () => { state.hardest = $('hardestpick').value; render(); });
+  $('rewards').addEventListener('change', () => { state.rewards = $('rewards').value.trim() || DEFAULT_REWARDS; render(); });
+  $('soundopt').addEventListener('change', () => { state.sound = $('soundopt').checked; saveState(); });
+  $('hidedone').addEventListener('change', () => { state.hideDone = $('hidedone').checked; render(); });
+  document.querySelectorAll('[data-qa]').forEach(b => b.addEventListener('click', () => {
+    const name = $('subjectpick').value, g = quickAdd(name, Number(b.dataset.qa));
+    $('subjectpick').value = name; $('lastpage').value = state.progress[keyFor(name)] ?? '';
+    if (g) $('feedback').textContent = `Added ${g} page${g > 1 ? 's' : ''} to ${name}.`;
+  }));
+  $('save').addEventListener('click', () => {
+    const name = $('subjectpick').value, s = byName(name), r = rangeFor(s), raw = $('lastpage').value;
+    if (raw.trim() === '') { $('feedback').textContent = 'Enter a page number first.'; return; }
+    const n = Number(raw);
+    if (!Number.isInteger(n) || n < 0 || n > r[1]) { $('feedback').textContent = `Enter a whole page number from 0 to ${r[1]}.`; return; }
+    act(info => { setLast(name, n, info); });
+    $('subjectpick').value = name; $('lastpage').value = n;
+    $('feedback').textContent = n < r[0] ? `Saved. Page ${n} is before this quarter’s portion (${r[0]}–${r[1]}).` : `Saved ${name}: studied through page ${Math.min(n, r[1])}.`;
+  });
+  $('markdone').addEventListener('click', () => {
+    const name = $('subjectpick').value, r = rangeFor(byName(name));
+    act(info => { setLast(name, r[1], info); });
+    $('subjectpick').value = name; $('lastpage').value = r[1]; $('feedback').textContent = name + ' marked complete!';
+  });
+  $('clearone').addEventListener('click', () => {
+    const name = $('subjectpick').value;
+    act(info => { delete state.progress[keyFor(name)]; info.lines.push(name + ' progress cleared'); });
+    $('subjectpick').value = name; $('lastpage').value = ''; $('feedback').textContent = name + ' progress cleared.';
+  });
+  $('reset').addEventListener('click', () => {
+    if (confirm('Delete all saved page progress, streaks, XP, badges, quiz results and the test date for every quarter? Your uploaded books and page offsets are kept.')) {
+      const keepOff = state.offsets;
+      state = defaultState(); state.offsets = keepOff; state.quarter = currentQuarter(); pickIdx = 0; render(); $('lastpage').value = ''; $('feedback').textContent = 'Everything has been reset.';
+    }
+  });
+  $('export').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify({...state, timer:null}, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = 'grade10-test2-progress-backup.json'; a.click(); URL.revokeObjectURL(url);
+  });
+  $('importfile').addEventListener('change', async e => {
+    const file = e.target.files[0]; if (!file) return;
+    try {
+      const parsed = JSON.parse(await file.text());
+      if (!isObj(parsed) || !isObj(parsed.progress)) throw Error('bad');
+      state = normalize(parsed); state.timer = null; migrateLegacy(); checkBadges({lines:[]}, true); pickIdx = 0; render();
+      $('feedback').textContent = 'Backup imported successfully.';
+      toast('Backup imported.');
+    } catch (err) { $('feedback').textContent = 'Could not read that backup file.'; toast('Could not read that backup file.'); }
+    e.target.value = '';
+  });
+  window.addEventListener('beforeprint', () => document.querySelectorAll('details').forEach(d => d.open = true));
+
+  /* ---------- start up ---------- */
+  function fillSelects() {
+    const sel = $('subjectpick'), hp = $('hardestpick');
+    sel.innerHTML = ''; hp.innerHTML = '<option value="">Not set yet</option>';
+    subjects.forEach(s => {
+      const o = document.createElement('option'); o.value = s.name; o.textContent = s.name; sel.append(o);
+      const h = document.createElement('option'); h.value = s.name; h.textContent = s.emoji + ' ' + s.name; hp.append(h);
+    });
+  }
+  fillSelects();
+  $('quarter').value = String(state.quarter || 2);
+  migrateLegacy();
+  checkBadges({lines:[]}, true);
+  render();
+  $('lastpage').value = state.progress[keyFor($('subjectpick').value)] ?? '';
+  tick();
+  refreshBooks();
+})();
+</script>
+</body>
+</html>
